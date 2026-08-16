@@ -80,3 +80,28 @@ roles, validaciones, conflictos y relaciones definidas en
 La evidencia y el procedimiento de comprobación del backend están en
 [la verificación del Hito 4](./docs/hito-4-verification.md). La colección y sus
 instrucciones se encuentran en [postman/](./postman/README.md).
+
+## Despliegue web
+
+La API se despliega en Render mediante `render.yaml` y la aplicación Vite en
+Vercel usando `web/vercel.json`.
+
+### Render
+
+Crear un Blueprint desde este repositorio. Render solicitará `DATABASE_URL` y
+`CORS_ORIGINS`; `JWT_SECRET` se genera automáticamente. La comprobación de salud
+es `GET /api/health`.
+
+Para `DATABASE_URL`, usar la conexión Session Pooler de Supabase en el puerto 5432. No copiar archivos `.env` al servicio.
+
+### Vercel
+
+Importar el mismo repositorio con `web` como Root Directory y definir:
+
+```text
+VITE_API_URL=https://heroes-tracker-api.onrender.com/api
+```
+
+Después de conocer la URL final de Vercel, actualizar `CORS_ORIGINS` en Render
+con el origen exacto, por ejemplo `https://heroes-tracker.vercel.app`, y volver a
+desplegar la API.

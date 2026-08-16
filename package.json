@@ -15,7 +15,6 @@
     "dev:mobile": "pnpm --filter @heroes-tracker/mobile dev",
     "db:check": "pnpm --filter @heroes-tracker/database check",
     "db:seed": "pnpm --filter @heroes-tracker/database seed",
-    "db:studio": "pnpm --filter @heroes-tracker/database studio",
     "postman:generate": "node postman/build-collection.mjs",
     "postman:validate": "node postman/validate.mjs",
     "prepostman:test": "pnpm --filter @heroes-tracker/backend build",

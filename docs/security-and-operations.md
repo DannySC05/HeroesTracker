@@ -70,6 +70,16 @@ explicar el uso de la IP local o de la URL desplegada para `EXPO_PUBLIC_API_URL`
 5. Configurar la URL pública y generar el build móvil con EAS.
 6. Ejecutar la colección de Postman contra producción.
 
+## Configuración versionada de despliegue
+
+- `render.yaml` crea la API como Web Service, valida `/api/health` y solicita los
+  secretos sin almacenarlos en Git.
+- `web/vercel.json` compila Vite y reescribe las rutas de la SPA a `index.html`.
+- `DATABASE_URL` usa el Session Pooler de Supabase en el puerto 5432 para el
+  servicio persistente de Render.
+- `VITE_API_URL` termina en `/api` y `CORS_ORIGINS` contiene únicamente orígenes,
+  sin rutas finales ni `/api`.
+
 ## Registro de errores
 
 - En desarrollo pueden registrarse detalles técnicos sin incluir secretos.
