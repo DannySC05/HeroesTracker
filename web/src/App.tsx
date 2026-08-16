@@ -7,7 +7,8 @@ import { HeroesPage } from './pages/HeroesPage';
 import { LoginPage } from './pages/LoginPage';
 import { MissionsPage } from './pages/MissionsPage';
 import { NotFoundPage } from './pages/NotFoundPage';
-import { ProtectedRoute, PublicOnlyRoute, RootRedirect } from './routes/RouteGuards';
+import { UsersPage } from './pages/UsersPage';
+import { AdminRoute, ProtectedRoute, PublicOnlyRoute, RootRedirect } from './routes/RouteGuards';
 
 export function AppRoutes() {
   return (
@@ -23,6 +24,9 @@ export function AppRoutes() {
           <Route index element={<DashboardPage />} />
           <Route path="heroes" element={<HeroesPage />} />
           <Route path="misiones" element={<MissionsPage />} />
+          <Route element={<AdminRoute />}>
+            <Route path="usuarios" element={<UsersPage />} />
+          </Route>
         </Route>
       </Route>
 

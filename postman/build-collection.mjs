@@ -411,8 +411,51 @@ const manualItems = [
       'pm.test("Siempre registra CONSULTA", () => pm.expect(response.data.rol).to.eql("CONSULTA"));',
       'pm.test("No expone contraseña", () => pm.expect(JSON.stringify(response)).not.to.include("password"));',
     ],
-    description:
-      'Ejecutar manualmente con un email nuevo. La API no incluye eliminación de usuarios, por lo que no forma parte del flujo automatizado.',
+    description: 'Ejecutar manualmente con un email nuevo para verificar el registro público.',
+  }),
+  apiRequest({
+    name: 'Listar usuarios CONSULTA como ADMIN',
+    method: 'GET',
+    path: '/api/usuarios',
+    tests: [
+      statusTest(200),
+      'const response = pm.response.json();',
+      'pm.test("Lista solo CONSULTA", () => response.data.forEach((user) => pm.expect(user.rol).to.eql("CONSULTA")));',
+    ],
+    description: 'Requiere ejecutar primero Login ADMIN.',
+  }),
+  apiRequest({
+    name: 'Crear usuario CONSULTA como ADMIN',
+    method: 'POST',
+    path: '/api/usuarios',
+    body: {
+      nombre: '{{manual_register_name}}',
+      email: '{{manual_register_email}}',
+      password: '{{manual_register_password}}',
+    },
+    tests: [
+      statusTest(201),
+      'const response = pm.response.json();',
+      'pm.test("Crea CONSULTA activo", () => { pm.expect(response.data.rol).to.eql("CONSULTA"); pm.expect(response.data.activo).to.eql(true); });',
+      'pm.environment.set("managed_user_id", response.data.id);',
+    ],
+    description: 'Requiere Login ADMIN y un email nuevo.',
+  }),
+  apiRequest({
+    name: 'Desactivar usuario CONSULTA como ADMIN',
+    method: 'PUT',
+    path: '/api/usuarios/{{managed_user_id}}',
+    body: {
+      nombre: '{{manual_register_name}}',
+      email: '{{manual_register_email}}',
+      activo: false,
+    },
+    tests: [
+      statusTest(200),
+      'const response = pm.response.json();',
+      'pm.test("Cuenta desactivada", () => pm.expect(response.data.activo).to.eql(false));',
+    ],
+    description: 'Ejecutar después de crear el usuario administrado.',
   }),
   apiRequest({
     name: 'Login con credenciales inválidas',
@@ -454,7 +497,7 @@ const collection = {
     {
       name: 'Ejemplos manuales',
       description:
-        'No se ejecutan en el comando automatizado. El registro requiere un email que aún no exista.',
+        'No se ejecutan en el comando automatizado. Incluye registro público y administración protegida de usuarios.',
       item: manualItems,
     },
   ],
@@ -462,6 +505,7 @@ const collection = {
     { key: 'run_suffix', value: '' },
     { key: 'hero_id', value: '' },
     { key: 'mission_id', value: '' },
+    { key: 'managed_user_id', value: '' },
   ],
 };
 

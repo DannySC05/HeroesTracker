@@ -2024,6 +2024,96 @@ textarea:focus-visible {
   }
 }
 
+.user-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.user-summary > div {
+  display: grid;
+  gap: 0.25rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  background: var(--surface);
+}
+
+.user-summary strong {
+  color: var(--text);
+  font-size: 1.6rem;
+}
+
+.user-summary span,
+.user-card__role span {
+  color: var(--muted);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.user-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.user-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  background: var(--surface);
+}
+
+.user-card__avatar {
+  display: grid;
+  width: 3rem;
+  height: 3rem;
+  place-items: center;
+  color: #fff;
+  background: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.user-card__identity {
+  min-width: 0;
+}
+
+.user-card__identity h2 {
+  margin: 0.35rem 0 0.15rem;
+  font-size: 1.15rem;
+}
+
+.user-card__identity p {
+  margin: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-overflow: ellipsis;
+}
+
+.user-card__role {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 6rem;
+}
+
+.user-card__role strong {
+  color: var(--cyan);
+  font-size: 0.68rem;
+}
+
+.user-card__actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
 /* Comic-inspired visual system */
 
 body {
@@ -2660,6 +2750,23 @@ h3 {
 }
 
 @media (max-width: 600px) {
+  .user-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .user-card {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .user-card__role,
+  .user-card__actions {
+    grid-column: 1 / -1;
+  }
+
+  .user-card__actions {
+    flex-wrap: wrap;
+  }
+
   .hero-image-search__heading {
     align-items: stretch;
     flex-direction: column;

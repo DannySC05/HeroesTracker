@@ -9,6 +9,7 @@ import type {
   HeroesStackParamList,
   MainTabParamList,
   MissionsStackParamList,
+  UsersStackParamList,
 } from './navigation.types';
 import { FavoritesScreen } from './screens/FavoritesScreen';
 import { HeroDetailScreen, HeroFormScreen, HeroesListScreen } from './screens/HeroesScreens';
@@ -19,10 +20,12 @@ import {
   MissionFormScreen,
   MissionsListScreen,
 } from './screens/MissionsScreens';
+import { UserFormScreen, UsersListScreen } from './screens/UsersScreens';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 const HeroesStack = createNativeStackNavigator<HeroesStackParamList>();
 const MissionsStack = createNativeStackNavigator<MissionsStackParamList>();
+const UsersStack = createNativeStackNavigator<UsersStackParamList>();
 
 const navigationTheme = {
   ...DarkTheme,
@@ -88,7 +91,25 @@ function MissionsNavigator() {
   );
 }
 
+function UsersNavigator() {
+  return (
+    <UsersStack.Navigator screenOptions={stackOptions}>
+      <UsersStack.Screen
+        name="UsersList"
+        component={UsersListScreen}
+        options={{ headerShown: false }}
+      />
+      <UsersStack.Screen
+        name="UserForm"
+        component={UserFormScreen}
+        options={{ title: 'Administrar usuario' }}
+      />
+    </UsersStack.Navigator>
+  );
+}
+
 function MainTabs() {
+  const { user } = useAuth();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -105,7 +126,9 @@ function MainTabs() {
                 ? 'H'
                 : route.name === 'Misiones'
                   ? 'M'
-                  : '★'}
+                  : route.name === 'Usuarios'
+                    ? 'U'
+                    : '★'}
           </Text>
         ),
       })}
@@ -114,6 +137,7 @@ function MainTabs() {
       <Tab.Screen name="Héroes" component={HeroesNavigator} />
       <Tab.Screen name="Misiones" component={MissionsNavigator} />
       <Tab.Screen name="Favoritos" component={FavoritesScreen} />
+      {user?.rol === 'ADMIN' ? <Tab.Screen name="Usuarios" component={UsersNavigator} /> : null}
     </Tab.Navigator>
   );
 }

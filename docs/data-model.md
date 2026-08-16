@@ -35,6 +35,7 @@ tokens_revocados
 | `email`         | VARCHAR(254)  | Obligatorio, único, normalizado a minúsculas               |
 | `password_hash` | VARCHAR(255)  | Obligatorio; nunca se guarda o retorna la contraseña plana |
 | `rol`           | `rol_usuario` | `ADMIN` o `CONSULTA`; por defecto `CONSULTA`               |
+| `activo`        | BOOLEAN       | Permite suspender acceso sin borrar la cuenta               |
 | `created_at`    | TIMESTAMPTZ   | Generado automáticamente                                   |
 | `updated_at`    | TIMESTAMPTZ   | Actualizado automáticamente                                |
 

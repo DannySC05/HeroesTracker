@@ -65,7 +65,9 @@ Un listado:
 
 ### `POST /api/auth/register`
 
-Acceso público. El rol se fuerza a `CONSULTA`.
+Acceso público según el contrato de la evaluación. El rol se fuerza a
+`CONSULTA`; las cuentas creadas también quedan disponibles en el módulo
+administrativo `/api/usuarios`.
 
 ```json
 {
@@ -99,7 +101,8 @@ Respuesta `200`:
       "id": "uuid",
       "nombre": "Peter Parker",
       "email": "peter@example.com",
-      "rol": "CONSULTA"
+      "rol": "CONSULTA",
+      "activo": true
     }
   }
 }
@@ -115,6 +118,21 @@ Acceso autenticado. Respuesta `200` con el usuario actual, sin contraseña ni ha
 
 Acceso autenticado para ambos roles. Revoca el JWT enviado y responde `204`.
 Repetir la operación con el mismo token devuelve `401` porque ya está revocado.
+
+## Usuarios de consulta
+
+Todas las rutas requieren un JWT con rol `ADMIN`. Las contraseñas y sus hashes
+nunca forman parte de las respuestas.
+
+| Método y ruta              | Entrada                                      | Éxito                  |
+| -------------------------- | -------------------------------------------- | ---------------------- |
+| `GET /api/usuarios`        | Sin cuerpo                                   | `200`, listado y total |
+| `POST /api/usuarios`       | `nombre`, `email`, `password`                | `201`, usuario creado  |
+| `PUT /api/usuarios/{id}`   | `nombre`, `email`, `activo`, `password?`     | `200`, actualizado     |
+
+El módulo solo administra cuentas `CONSULTA`. Omitir `password` en `PUT`
+conserva la contraseña actual. Al establecer `activo: false`, el login se
+rechaza y cualquier JWT anterior deja de ser válido en la siguiente solicitud.
 
 ## Héroes
 

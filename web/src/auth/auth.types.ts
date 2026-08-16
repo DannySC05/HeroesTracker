@@ -7,6 +7,7 @@ export interface AuthUser {
   nombre: string;
   email: string;
   rol: UserRole;
+  activo: boolean;
 }
 
 export interface LoginCredentials {

@@ -12,6 +12,8 @@ import { createHeroRouter } from './modules/heroes/hero.routes.js';
 import { HeroService } from './modules/heroes/hero.service.js';
 import { createMissionRouter } from './modules/missions/mission.routes.js';
 import { MissionService } from './modules/missions/mission.service.js';
+import { createUserRouter } from './modules/users/user.routes.js';
+import { UserService } from './modules/users/user.service.js';
 import { errorHandler, notFoundHandler } from './shared/http/error-handler.js';
 
 export interface AppDependencies {
@@ -50,6 +52,10 @@ export function createApp({
   });
 
   app.use('/api/auth', createAuthRouter(authService));
+  app.use(
+    '/api/usuarios',
+    createUserRouter(authService, new UserService(authRepository, authConfig)),
+  );
   app.use(
     '/api/hero-images',
     createHeroImageRouter(authService, new HeroImageService(heroImageProvider)),

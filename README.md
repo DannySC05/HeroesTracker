@@ -91,6 +91,10 @@ Vercel usando `web/vercel.json`.
 La aplicación móvil utiliza Expo y está preparada para EAS Build mediante
 `mobile/eas.json`. Sus instrucciones están en `mobile/README.md`.
 
+El módulo de usuarios requiere ejecutar
+`database/migrations/003_user_account_status.sql` en Supabase antes de desplegar
+la versión correspondiente del backend.
+
 ### Render
 
 Crear un Blueprint desde este repositorio. Render solicitará `DATABASE_URL` y

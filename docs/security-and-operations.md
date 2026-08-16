@@ -6,14 +6,16 @@
 - Se aplica hash con bcrypt y un costo configurable, nunca cifrado reversible.
 - La API nunca registra ni retorna contraseñas o hashes.
 - El login utiliza un mensaje genérico para no revelar si el email existe.
+- Solo `ADMIN` puede crear o administrar cuentas `CONSULTA`.
+- Desactivar una cuenta invalida su acceso en la siguiente validación del JWT.
 
 ## JWT
 
 - Algoritmo inicial: `HS256` con un secreto largo y exclusivo por entorno.
 - Duración inicial: 2 horas (`7200` segundos).
 - Claims mínimas: `sub` (usuario), `rol`, `jti`, `iat` y `exp`.
-- La API valida firma, expiración, usuario existente y ausencia del `jti` en la
-  tabla de tokens revocados.
+- La API valida firma, expiración, usuario existente, cuenta activa y ausencia
+  del `jti` en la tabla de tokens revocados.
 - Logout registra el `jti` hasta su expiración. Una tarea de mantenimiento podrá
   eliminar registros expirados sin alterar el comportamiento funcional.
 - Web guarda el token en `sessionStorage` para limitar su persistencia.

@@ -33,8 +33,30 @@ describe('API de autenticación', () => {
     app = createApp({ authConfig, authRepository: repository });
   });
 
+  async function createAdminToken() {
+    const adminPassword = 'AdminPassword123';
+    repository.seedUser({
+      id: randomUUID(),
+      nombre: 'Administrador',
+      email: 'admin@example.com',
+      passwordHash: await hash(adminPassword, authConfig.bcryptRounds),
+      rol: 'ADMIN',
+      activo: true,
+    });
+    const response = await request(app)
+      .post('/api/auth/login')
+      .send({ email: 'admin@example.com', password: adminPassword })
+      .expect(200);
+    return response.body.data.token as string;
+  }
+
   async function registerAndLogin() {
-    await request(app).post('/api/auth/register').send(validRegistration).expect(201);
+    const adminToken = await createAdminToken();
+    await request(app)
+      .post('/api/auth/register')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send(validRegistration)
+      .expect(201);
     const loginResponse = await request(app)
       .post('/api/auth/login')
       .send({ email: validRegistration.email, password: validRegistration.password })
@@ -44,8 +66,10 @@ describe('API de autenticación', () => {
   }
 
   it('registra un usuario CONSULTA, normaliza el email y nunca expone el hash', async () => {
+    const adminToken = await createAdminToken();
     const response = await request(app)
       .post('/api/auth/register')
+      .set('Authorization', `Bearer ${adminToken}`)
       .send({ ...validRegistration, email: '  PETER@EXAMPLE.COM  ' })
       .expect(201);
 
@@ -55,6 +79,7 @@ describe('API de autenticación', () => {
         nombre: validRegistration.nombre,
         email: validRegistration.email,
         rol: 'CONSULTA',
+        activo: true,
       },
     });
     expect(JSON.stringify(response.body)).not.toContain('password');
@@ -65,28 +90,41 @@ describe('API de autenticación', () => {
   });
 
   it('rechaza campos no permitidos, datos inválidos y emails duplicados', async () => {
+    const adminToken = await createAdminToken();
     const roleResponse = await request(app)
       .post('/api/auth/register')
+      .set('Authorization', `Bearer ${adminToken}`)
       .send({ ...validRegistration, rol: 'ADMIN' })
       .expect(400);
     expect(roleResponse.body.error.code).toBe('VALIDATION_ERROR');
 
     const validationResponse = await request(app)
       .post('/api/auth/register')
+      .set('Authorization', `Bearer ${adminToken}`)
       .send({ nombre: '', email: 'no-es-email', password: 'corta' })
       .expect(400);
     expect(validationResponse.body.error.details).toHaveLength(3);
 
-    await request(app).post('/api/auth/register').send(validRegistration).expect(201);
+    await request(app)
+      .post('/api/auth/register')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send(validRegistration)
+      .expect(201);
     const duplicateResponse = await request(app)
       .post('/api/auth/register')
+      .set('Authorization', `Bearer ${adminToken}`)
       .send({ ...validRegistration, email: 'PETER@example.com' })
       .expect(409);
     expect(duplicateResponse.body.error.code).toBe('EMAIL_ALREADY_EXISTS');
   });
 
   it('rechaza credenciales incorrectas y entrega un JWT con expiración al iniciar sesión', async () => {
-    await request(app).post('/api/auth/register').send(validRegistration).expect(201);
+    const adminToken = await createAdminToken();
+    await request(app)
+      .post('/api/auth/register')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send(validRegistration)
+      .expect(201);
 
     const invalidResponse = await request(app)
       .post('/api/auth/login')
@@ -134,20 +172,7 @@ describe('API de autenticación', () => {
 
   it('responde 403 a CONSULTA y permite el acceso a ADMIN', async () => {
     const consultaToken = await registerAndLogin();
-    const adminPassword = 'AdminPassword123';
-    repository.seedUser({
-      id: randomUUID(),
-      nombre: 'Administrador',
-      email: 'admin@example.com',
-      passwordHash: await hash(adminPassword, authConfig.bcryptRounds),
-      rol: 'ADMIN',
-    });
-
-    const adminLogin = await request(app)
-      .post('/api/auth/login')
-      .send({ email: 'admin@example.com', password: adminPassword })
-      .expect(200);
-    const adminToken = adminLogin.body.data.token as string;
+    const adminToken = await createAdminToken();
 
     const authService = new AuthService(repository, authConfig);
     const protectedApp = express();

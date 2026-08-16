@@ -7,6 +7,7 @@ import type {
   RevokeTokenInput,
   UserRecord,
   UserRole,
+  UpdateConsultationUserInput,
 } from './auth.types.js';
 
 interface DatabaseError {
@@ -19,6 +20,7 @@ interface UserRow extends QueryResultRow {
   email: string;
   password_hash: string;
   rol: string;
+  activo: boolean;
 }
 
 function toUserRecord(user: UserRow): UserRecord {
@@ -28,10 +30,11 @@ function toUserRecord(user: UserRow): UserRecord {
     email: user.email,
     passwordHash: user.password_hash,
     rol: user.rol as UserRole,
+    activo: user.activo,
   };
 }
 
-const userColumns = 'id, nombre, email, password_hash, rol';
+const userColumns = 'id, nombre, email, password_hash, rol, activo';
 
 function requiredUser(rows: UserRow[]): UserRow {
   const user = rows[0];
@@ -49,10 +52,10 @@ export class PostgresAuthRepository implements AuthRepository {
   async createUser(input: CreateUserInput): Promise<UserRecord> {
     try {
       const result = await this.database.query<UserRow>(
-        `INSERT INTO usuarios (nombre, email, password_hash, rol, updated_at)
-         VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)
+        `INSERT INTO usuarios (nombre, email, password_hash, rol, activo, updated_at)
+         VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP)
          RETURNING ${userColumns}`,
-        [input.nombre, input.email, input.passwordHash, input.rol],
+        [input.nombre, input.email, input.passwordHash, input.rol, input.activo ?? true],
       );
 
       return toUserRecord(requiredUser(result.rows));
@@ -81,6 +84,41 @@ export class PostgresAuthRepository implements AuthRepository {
     );
 
     return result.rows[0] ? toUserRecord(result.rows[0]) : null;
+  }
+
+  async listConsultationUsers(): Promise<UserRecord[]> {
+    const result = await this.database.query<UserRow>(
+      `SELECT ${userColumns}
+       FROM usuarios
+       WHERE rol = 'CONSULTA'
+       ORDER BY activo DESC, nombre ASC, email ASC`,
+    );
+    return result.rows.map(toUserRecord);
+  }
+
+  async updateConsultationUser(
+    id: string,
+    input: UpdateConsultationUserInput,
+  ): Promise<UserRecord | null> {
+    try {
+      const result = await this.database.query<UserRow>(
+        `UPDATE usuarios
+         SET nombre = $2,
+             email = $3,
+             password_hash = COALESCE($4, password_hash),
+             activo = $5,
+             updated_at = CURRENT_TIMESTAMP
+         WHERE id = $1 AND rol = 'CONSULTA'
+         RETURNING ${userColumns}`,
+        [id, input.nombre, input.email, input.passwordHash ?? null, input.activo],
+      );
+      return result.rows[0] ? toUserRecord(result.rows[0]) : null;
+    } catch (error) {
+      if ((error as DatabaseError).code === '23505') {
+        throw new DuplicateEmailError();
+      }
+      throw error;
+    }
   }
 
   async isTokenRevoked(jti: string): Promise<boolean> {

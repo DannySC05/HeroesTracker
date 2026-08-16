@@ -42,6 +42,7 @@ function toPublicUser(user: UserRecord): PublicUser {
     nombre: user.nombre,
     email: user.email,
     rol: user.rol,
+    activo: user.activo,
   };
 }
 
@@ -79,6 +80,7 @@ export class AuthService {
         email,
         passwordHash,
         rol: 'CONSULTA',
+        activo: true,
       });
 
       return toPublicUser(user);
@@ -94,7 +96,9 @@ export class AuthService {
   async login(input: LoginInput): Promise<LoginResult> {
     const email = input.email.trim().toLowerCase();
     const user = await this.repository.findUserByEmail(email);
-    const credentialsAreValid = user ? await compare(input.password, user.passwordHash) : false;
+    const credentialsAreValid = user?.activo
+      ? await compare(input.password, user.passwordHash)
+      : false;
 
     if (!user || !credentialsAreValid) {
       throw new AppError(401, 'INVALID_CREDENTIALS', 'Email o contraseña incorrectos.');
@@ -144,7 +148,7 @@ export class AuthService {
 
     const user = await this.repository.findUserById(payload.sub);
 
-    if (!user) {
+    if (!user || !user.activo) {
       throw authenticationError();
     }
 

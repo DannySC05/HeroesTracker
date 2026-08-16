@@ -32,6 +32,11 @@ export function PublicOnlyRoute() {
   return <Outlet />;
 }
 
+export function AdminRoute() {
+  const { user } = useAuth();
+  return user?.rol === 'ADMIN' ? <Outlet /> : <Navigate to="/app" replace />;
+}
+
 export function RootRedirect() {
   const { status } = useAuth();
 

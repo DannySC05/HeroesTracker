@@ -11,6 +11,7 @@ CREATE TABLE "usuarios" (
     "email" VARCHAR(254) NOT NULL,
     "password_hash" VARCHAR(255) NOT NULL,
     "rol" "rol_usuario" NOT NULL DEFAULT 'CONSULTA',
+    "activo" BOOLEAN NOT NULL DEFAULT TRUE,
     "created_at" TIMESTAMP(3) WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) WITH TIME ZONE NOT NULL,
 

@@ -735,11 +735,11 @@
     },
     {
       "name": "Ejemplos manuales",
-      "description": "No se ejecutan en el comando automatizado. El registro requiere un email que aún no exista.",
+      "description": "No se ejecutan en el comando automatizado. Incluye registro público y administración protegida de usuarios.",
       "item": [
         {
           "name": "Registrar usuario CONSULTA",
-          "description": "Ejecutar manualmente con un email nuevo. La API no incluye eliminación de usuarios, por lo que no forma parte del flujo automatizado.",
+          "description": "Ejecutar manualmente con un email nuevo para verificar el registro público.",
           "event": [
             {
               "listen": "test",
@@ -763,7 +763,95 @@
               "options": { "raw": { "language": "json" } }
             },
             "url": "{{base_url}}/api/auth/register",
-            "description": "Ejecutar manualmente con un email nuevo. La API no incluye eliminación de usuarios, por lo que no forma parte del flujo automatizado."
+            "description": "Ejecutar manualmente con un email nuevo para verificar el registro público."
+          }
+        },
+        {
+          "name": "Listar usuarios CONSULTA como ADMIN",
+          "description": "Requiere ejecutar primero Login ADMIN.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "const response = pm.response.json();",
+                  "pm.test(\"Lista solo CONSULTA\", () => response.data.forEach((user) => pm.expect(user.rol).to.eql(\"CONSULTA\")));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}", "type": "text" }
+            ],
+            "url": "{{base_url}}/api/usuarios",
+            "description": "Requiere ejecutar primero Login ADMIN."
+          }
+        },
+        {
+          "name": "Crear usuario CONSULTA como ADMIN",
+          "description": "Requiere Login ADMIN y un email nuevo.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "const response = pm.response.json();",
+                  "pm.test(\"Crea CONSULTA activo\", () => { pm.expect(response.data.rol).to.eql(\"CONSULTA\"); pm.expect(response.data.activo).to.eql(true); });",
+                  "pm.environment.set(\"managed_user_id\", response.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"{{manual_register_name}}\",\n  \"email\": \"{{manual_register_email}}\",\n  \"password\": \"{{manual_register_password}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{base_url}}/api/usuarios",
+            "description": "Requiere Login ADMIN y un email nuevo."
+          }
+        },
+        {
+          "name": "Desactivar usuario CONSULTA como ADMIN",
+          "description": "Ejecutar después de crear el usuario administrado.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "const response = pm.response.json();",
+                  "pm.test(\"Cuenta desactivada\", () => pm.expect(response.data.activo).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"{{manual_register_name}}\",\n  \"email\": \"{{manual_register_email}}\",\n  \"activo\": false\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{base_url}}/api/usuarios/{{managed_user_id}}",
+            "description": "Ejecutar después de crear el usuario administrado."
           }
         },
         {
@@ -823,6 +911,7 @@
   "variable": [
     { "key": "run_suffix", "value": "" },
     { "key": "hero_id", "value": "" },
-    { "key": "mission_id", "value": "" }
+    { "key": "mission_id", "value": "" },
+    { "key": "managed_user_id", "value": "" }
   ]
 }

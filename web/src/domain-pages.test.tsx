@@ -36,6 +36,7 @@ const adminUser: AuthUser = {
   nombre: 'Administrador General',
   email: 'admin@example.com',
   rol: 'ADMIN',
+  activo: true,
 };
 
 const consultaUser: AuthUser = {

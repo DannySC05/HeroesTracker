@@ -32,5 +32,9 @@ Si la base ya fue creada, ejecutar también
 `database/migrations/002_optional_hero_image.sql`. Esta migración permite guardar
 héroes originales sin imagen y mantener el placeholder en la interfaz.
 
+Para habilitar la administración de cuentas, ejecutar después
+`database/migrations/003_user_account_status.sql`. Agrega el estado activo sin
+alterar los usuarios existentes.
+
 El seed puede repetirse sin crear duplicados. Actualiza los dos usuarios de prueba,
 los ocho héroes y las seis misiones identificados por claves estables.

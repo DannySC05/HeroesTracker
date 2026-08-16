@@ -8,6 +8,7 @@ export interface UserRecord {
   email: string;
   passwordHash: string;
   rol: UserRole;
+  activo: boolean;
 }
 
 export type PublicUser = Omit<UserRecord, 'passwordHash'>;
@@ -17,6 +18,14 @@ export interface CreateUserInput {
   email: string;
   passwordHash: string;
   rol: UserRole;
+  activo?: boolean;
+}
+
+export interface UpdateConsultationUserInput {
+  nombre: string;
+  email: string;
+  passwordHash?: string;
+  activo: boolean;
 }
 
 export interface RevokeTokenInput {
@@ -29,6 +38,11 @@ export interface AuthRepository {
   createUser(input: CreateUserInput): Promise<UserRecord>;
   findUserByEmail(email: string): Promise<UserRecord | null>;
   findUserById(id: string): Promise<UserRecord | null>;
+  listConsultationUsers(): Promise<UserRecord[]>;
+  updateConsultationUser(
+    id: string,
+    input: UpdateConsultationUserInput,
+  ): Promise<UserRecord | null>;
   isTokenRevoked(jti: string): Promise<boolean>;
   revokeToken(input: RevokeTokenInput): Promise<void>;
 }

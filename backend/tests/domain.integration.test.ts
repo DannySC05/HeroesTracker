@@ -55,6 +55,7 @@ describe('API de héroes y misiones', () => {
       email: adminCredentials.email,
       passwordHash: adminPasswordHash,
       rol: 'ADMIN',
+      activo: true,
     });
     authRepository.seedUser({
       id: randomUUID(),
@@ -62,6 +63,7 @@ describe('API de héroes y misiones', () => {
       email: consultaCredentials.email,
       passwordHash: consultaPasswordHash,
       rol: 'CONSULTA',
+      activo: true,
     });
 
     domainRepository = new InMemoryDomainRepository();

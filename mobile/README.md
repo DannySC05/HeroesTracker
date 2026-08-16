@@ -16,12 +16,14 @@ una versión mayor debe migrarse junto con React Native y Expo Go.
 ## Funcionalidades
 
 - inicio de sesión JWT persistido con AsyncStorage y cierre de sesión;
-- navegación protegida con Inicio, Héroes, Misiones y Favoritos;
+- navegación protegida con Inicio, Héroes, Misiones, Favoritos y Usuarios;
 - héroes y misiones obtenidos desde la API mediante `FlatList`;
 - búsqueda y detalle de héroes, misiones activas e historial completado;
 - favoritos persistentes por usuario mediante AsyncStorage;
 - detalle y filtros de misiones;
 - CRUD de héroes y misiones para `ADMIN` y consulta para `CONSULTA`;
+- creación, edición, restablecimiento de contraseña y activación de usuarios
+  `CONSULTA`, visible exclusivamente para `ADMIN`;
 - búsqueda protegida de imágenes en Comic Vine desde el backend;
 - estados de carga, error, vacío y actualización por gesto.
 

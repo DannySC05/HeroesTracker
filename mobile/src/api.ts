@@ -6,6 +6,9 @@ import type {
   HeroPayload,
   Mission,
   MissionPayload,
+  ConsultationUser,
+  CreateConsultationUserPayload,
+  UpdateConsultationUserPayload,
 } from './types';
 
 const apiBaseUrl = (
@@ -87,10 +90,9 @@ export function apiErrorMessage(error: unknown, fallback: string): string {
 }
 
 export async function login(email: string, password: string) {
-  const response = await request<Envelope<{ token: string; expires_in: number; usuario: AuthUser }>>(
-    '/auth/login',
-    { method: 'POST', ...jsonBody({ email, password }) },
-  );
+  const response = await request<
+    Envelope<{ token: string; expires_in: number; usuario: AuthUser }>
+  >('/auth/login', { method: 'POST', ...jsonBody({ email, password }) });
   return response.data;
 }
 
@@ -112,15 +114,12 @@ export async function getHero(id: string): Promise<Hero> {
 }
 
 export async function createHero(payload: HeroPayload): Promise<Hero> {
-  return (
-    await request<Envelope<Hero>>('/heroes', { method: 'POST', ...jsonBody(payload) })
-  ).data;
+  return (await request<Envelope<Hero>>('/heroes', { method: 'POST', ...jsonBody(payload) })).data;
 }
 
 export async function updateHero(id: string, payload: HeroPayload): Promise<Hero> {
-  return (
-    await request<Envelope<Hero>>(`/heroes/${id}`, { method: 'PUT', ...jsonBody(payload) })
-  ).data;
+  return (await request<Envelope<Hero>>(`/heroes/${id}`, { method: 'PUT', ...jsonBody(payload) }))
+    .data;
 }
 
 export async function deleteHero(id: string): Promise<void> {
@@ -129,9 +128,7 @@ export async function deleteHero(id: string): Promise<void> {
 
 export async function searchHeroImages(name: string): Promise<HeroImageCandidate[]> {
   return (
-    await request<ListEnvelope<HeroImageCandidate>>(
-      `/hero-images?name=${encodeURIComponent(name)}`,
-    )
+    await request<ListEnvelope<HeroImageCandidate>>(`/hero-images?name=${encodeURIComponent(name)}`)
   ).data;
 }
 
@@ -144,9 +141,8 @@ export async function getMission(id: string): Promise<Mission> {
 }
 
 export async function createMission(payload: MissionPayload): Promise<Mission> {
-  return (
-    await request<Envelope<Mission>>('/misiones', { method: 'POST', ...jsonBody(payload) })
-  ).data;
+  return (await request<Envelope<Mission>>('/misiones', { method: 'POST', ...jsonBody(payload) }))
+    .data;
 }
 
 export async function updateMission(id: string, payload: MissionPayload): Promise<Mission> {
@@ -157,4 +153,31 @@ export async function updateMission(id: string, payload: MissionPayload): Promis
 
 export async function deleteMission(id: string): Promise<void> {
   await request(`/misiones/${id}`, { method: 'DELETE' });
+}
+
+export async function listConsultationUsers(): Promise<ConsultationUser[]> {
+  return (await request<ListEnvelope<ConsultationUser>>('/usuarios')).data;
+}
+
+export async function createConsultationUser(
+  payload: CreateConsultationUserPayload,
+): Promise<ConsultationUser> {
+  return (
+    await request<Envelope<ConsultationUser>>('/usuarios', {
+      method: 'POST',
+      ...jsonBody(payload),
+    })
+  ).data;
+}
+
+export async function updateConsultationUser(
+  id: string,
+  payload: UpdateConsultationUserPayload,
+): Promise<ConsultationUser> {
+  return (
+    await request<Envelope<ConsultationUser>>(`/usuarios/${id}`, {
+      method: 'PUT',
+      ...jsonBody(payload),
+    })
+  ).data;
 }

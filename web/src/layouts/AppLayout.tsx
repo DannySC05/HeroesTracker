@@ -71,6 +71,18 @@ export function AppLayout() {
             <Icon name="target" />
             <span>Misiones</span>
           </NavLink>
+          {user?.rol === 'ADMIN' ? (
+            <NavLink
+              className={({ isActive }) =>
+                `sidebar__link${isActive ? ' sidebar__link--active' : ''}`
+              }
+              to="/app/usuarios"
+              onClick={() => setNavigationOpen(false)}
+            >
+              <Icon name="users" />
+              <span>Usuarios</span>
+            </NavLink>
+          ) : null}
         </nav>
 
         <div className="sidebar__security">

@@ -12,9 +12,15 @@ export type MissionsStackParamList = {
   MissionForm: { missionId?: string } | undefined;
 };
 
+export type UsersStackParamList = {
+  UsersList: undefined;
+  UserForm: { userId?: string } | undefined;
+};
+
 export type MainTabParamList = {
   Inicio: undefined;
   Héroes: NavigatorScreenParams<HeroesStackParamList> | undefined;
   Misiones: NavigatorScreenParams<MissionsStackParamList> | undefined;
   Favoritos: undefined;
+  Usuarios: NavigatorScreenParams<UsersStackParamList> | undefined;
 };

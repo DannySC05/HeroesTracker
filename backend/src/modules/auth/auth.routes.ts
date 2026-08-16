@@ -52,6 +52,7 @@ export function createAuthRouter(authService: AuthService) {
         nombre: user.nombre,
         email: user.email,
         rol: user.rol,
+        activo: user.activo,
       },
     });
   });
@@ -69,6 +70,7 @@ export function createAuthRouter(authService: AuthService) {
           nombre: result.user.nombre,
           email: result.user.email,
           rol: result.user.rol,
+          activo: result.user.activo,
         },
       },
     });
@@ -83,6 +85,7 @@ export function createAuthRouter(authService: AuthService) {
         nombre: user.nombre,
         email: user.email,
         rol: user.rol,
+        activo: user.activo,
       },
     });
   });

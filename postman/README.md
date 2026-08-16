@@ -26,9 +26,9 @@ guardar ni exportar una copia con secretos reales dentro del repositorio.
 El flujo guarda automáticamente los JWT y los UUID temporales. Al final revoca
 los tokens y elimina primero la misión y luego el héroe creado durante la prueba.
 
-La carpeta `Ejemplos manuales` contiene `register` y el caso de credenciales
-inválidas. El registro no forma parte del flujo automático porque la API no
-incluye eliminación de usuarios y cada ejecución dejaría una cuenta nueva.
+La carpeta `Ejemplos manuales` contiene la creación protegida de usuarios
+`CONSULTA` y el caso de credenciales inválidas. Para crear una cuenta, ejecutar
+primero Login ADMIN y usar un email que aún no exista.
 
 ## Uso desde terminal
 
