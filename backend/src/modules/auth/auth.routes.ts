@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { z, type ZodType } from 'zod';
+import { z } from 'zod';
 
-import { AppError } from '../../shared/errors/app-error.js';
+import { parseInput } from '../../shared/http/validation.js';
 import { authenticate } from './auth.middleware.js';
 import type { AuthService } from './auth.service.js';
 
@@ -20,30 +20,12 @@ const loginSchema = z
   })
   .strict();
 
-function parseBody<T>(schema: ZodType<T>, body: unknown): T {
-  const result = schema.safeParse(body);
-
-  if (!result.success) {
-    throw new AppError(
-      400,
-      'VALIDATION_ERROR',
-      'Los datos enviados no son válidos.',
-      result.error.issues.map((issue) => ({
-        field: issue.path.length > 0 ? issue.path.join('.') : 'body',
-        message: issue.message,
-      })),
-    );
-  }
-
-  return result.data;
-}
-
 export function createAuthRouter(authService: AuthService) {
   const router = Router();
   const requireAuthentication = authenticate(authService);
 
   router.post('/register', async (request, response) => {
-    const input = parseBody(registerSchema, request.body);
+    const input = parseInput(registerSchema, request.body);
     const user = await authService.register(input);
 
     response.status(201).json({
@@ -58,7 +40,7 @@ export function createAuthRouter(authService: AuthService) {
   });
 
   router.post('/login', async (request, response) => {
-    const input = parseBody(loginSchema, request.body);
+    const input = parseInput(loginSchema, request.body);
     const result = await authService.login(input);
 
     response.status(200).json({

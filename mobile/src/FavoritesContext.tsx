@@ -9,6 +9,7 @@ import {
 
 import { useAuth } from './AuthContext';
 import { readFavorites, writeFavorites } from './storage';
+import type { AuthUser } from './types';
 
 interface FavoritesContextValue {
   favoriteIds: Set<string>;
@@ -20,20 +21,27 @@ const FavoritesContext = createContext<FavoritesContextValue | null>(null);
 
 export function FavoritesProvider({ children }: PropsWithChildren) {
   const { user } = useAuth();
+  const providerKey = user?.id ?? 'anonymous';
+
+  return (
+    <FavoritesStateProvider key={providerKey} user={user}>
+      {children}
+    </FavoritesStateProvider>
+  );
+}
+
+interface FavoritesStateProviderProps extends PropsWithChildren {
+  user: AuthUser | null;
+}
+
+function FavoritesStateProvider({ children, user }: FavoritesStateProviderProps) {
   const [favoriteIds, setFavoriteIds] = useState(new Set<string>());
-  const [ready, setReady] = useState(false);
+  const [ready, setReady] = useState(!user);
 
   useEffect(() => {
-    let active = true;
-    setReady(false);
+    if (!user) return;
 
-    if (!user) {
-      setFavoriteIds(new Set());
-      setReady(true);
-      return () => {
-        active = false;
-      };
-    }
+    let active = true;
 
     readFavorites(user.id).then((ids) => {
       if (active) {
