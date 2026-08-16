@@ -6,6 +6,7 @@ import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { createApp } from '../src/app.js';
 import type { AuthConfig } from '../src/modules/auth/auth.types.js';
+import type { HeroImageProvider } from '../src/modules/hero-images/hero-image.types.js';
 import { InMemoryAuthRepository } from './support/in-memory-auth.repository.js';
 import { InMemoryDomainRepository } from './support/in-memory-domain.repository.js';
 
@@ -117,7 +118,22 @@ describe('API de héroes y misiones', () => {
       superheroeId: spiderManId,
     });
 
-    app = createApp({ authConfig, authRepository, domainRepository });
+    const heroImageProvider: HeroImageProvider = {
+      search: async (name) =>
+        name === 'Spider-Man'
+          ? [
+              {
+                id: '620',
+                name: 'Spider-Man',
+                fullName: 'Peter Parker',
+                publisher: 'Marvel Comics',
+                imageUrl: 'https://example.com/external-spider-man.jpg',
+              },
+            ]
+          : [],
+    };
+
+    app = createApp({ authConfig, authRepository, domainRepository, heroImageProvider });
 
     const [adminLogin, consultaLogin] = await Promise.all([
       request(app).post('/api/auth/login').send(adminCredentials),
@@ -188,6 +204,36 @@ describe('API de héroes y misiones', () => {
   });
 
   describe('héroes', () => {
+    it('protege la búsqueda de imágenes y devuelve la selección automática', async () => {
+      await request(app).get('/api/hero-images?name=Spider-Man').expect(401);
+      await request(app)
+        .get('/api/hero-images?name=Spider-Man')
+        .set(authorize(consultaToken))
+        .expect(403);
+
+      const response = await request(app)
+        .get('/api/hero-images?name=Spider-Man')
+        .set(authorize(adminToken))
+        .expect(200);
+
+      expect(response.body.data[0]).toMatchObject({
+        id: '620',
+        name: 'Spider-Man',
+        image_url: 'https://example.com/external-spider-man.jpg',
+      });
+      expect(response.body.meta.automatic_selection_id).toBe('620');
+    });
+
+    it('permite registrar un héroe original sin imagen', async () => {
+      const response = await request(app)
+        .post('/api/heroes')
+        .set(authorize(adminToken))
+        .send({ ...validHeroBody, nombre: 'Original Hero', imagen_url: null })
+        .expect(201);
+
+      expect(response.body.data.imagen_url).toBeNull();
+    });
+
     it('lista por nombre ascendente con total y búsqueda parcial sin distinguir mayúsculas', async () => {
       const list = await request(app).get('/api/heroes').set(authorize(consultaToken)).expect(200);
       expect(list.body.meta.total).toBe(3);

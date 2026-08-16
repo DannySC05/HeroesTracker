@@ -791,6 +791,31 @@
             },
             "url": "{{base_url}}/api/auth/login"
           }
+        },
+        {
+          "name": "Buscar imágenes de Spider-Man",
+          "description": "Requiere ejecutar primero Login ADMIN y configurar COMICVINE_API_KEY en el backend.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "const response = pm.response.json();",
+                  "pm.test(\"Devuelve candidatos de imagen\", () => pm.expect(response.data).to.be.an(\"array\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}", "type": "text" }
+            ],
+            "url": "{{base_url}}/api/hero-images?name=Spider-Man",
+            "description": "Requiere ejecutar primero Login ADMIN y configurar COMICVINE_API_KEY en el backend."
+          }
         }
       ]
     }

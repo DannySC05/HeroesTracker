@@ -17,7 +17,8 @@ const heroBodySchema = z
       .string()
       .trim()
       .url('Debe ser una URL válida.')
-      .refine((value) => /^https?:\/\//i.test(value), 'Debe usar el protocolo HTTP o HTTPS.'),
+      .refine((value) => /^https?:\/\//i.test(value), 'Debe usar el protocolo HTTP o HTTPS.')
+      .nullable(),
     estado: z.enum(HERO_STATES),
   })
   .strict();

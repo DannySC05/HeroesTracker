@@ -4,11 +4,15 @@ import { corsOrigins, env } from './config/env.js';
 import { database } from './lib/database.js';
 import { PostgresAuthRepository } from './modules/auth/postgres-auth.repository.js';
 import { PostgresDomainRepository } from './modules/domain/postgres-domain.repository.js';
+import { ComicVineApiClient } from './modules/hero-images/comic-vine-api.client.js';
 
 const app = createApp({
   authConfig,
   authRepository: new PostgresAuthRepository(database),
   domainRepository: new PostgresDomainRepository(database),
+  heroImageProvider: env.COMICVINE_API_KEY
+    ? new ComicVineApiClient(env.COMICVINE_API_KEY)
+    : undefined,
   corsOrigins,
 });
 

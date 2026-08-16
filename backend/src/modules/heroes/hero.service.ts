@@ -83,7 +83,7 @@ export class HeroService {
       nombre: input.nombre.trim(),
       nombreReal: input.nombreReal.trim(),
       poderPrincipal: input.poderPrincipal.trim(),
-      imagenUrl: input.imagenUrl.trim(),
+      imagenUrl: input.imagenUrl?.trim() || null,
     };
   }
 }

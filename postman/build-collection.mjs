@@ -422,6 +422,18 @@ const manualItems = [
     body: { email: 'invalid@example.com', password: 'InvalidPassword123' },
     tests: [statusTest(401), ...errorCodeTest('INVALID_CREDENTIALS')],
   }),
+  apiRequest({
+    name: 'Buscar imágenes de Spider-Man',
+    method: 'GET',
+    path: '/api/hero-images?name=Spider-Man',
+    tests: [
+      statusTest(200),
+      'const response = pm.response.json();',
+      'pm.test("Devuelve candidatos de imagen", () => pm.expect(response.data).to.be.an("array"));',
+    ],
+    description:
+      'Requiere ejecutar primero Login ADMIN y configurar COMICVINE_API_KEY en el backend.',
+  }),
 ];
 
 const collection = {

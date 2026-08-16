@@ -1,5 +1,12 @@
 import { http } from '../api/http';
-import type { Hero, HeroPayload, Mission, MissionPayload } from './domain.types';
+import type {
+  Hero,
+  HeroImageCandidate,
+  HeroImageSearchResult,
+  HeroPayload,
+  Mission,
+  MissionPayload,
+} from './domain.types';
 
 interface ItemEnvelope<T> {
   data: T;
@@ -36,6 +43,18 @@ export async function updateHero(id: string, payload: HeroPayload): Promise<Hero
 
 export async function deleteHero(id: string): Promise<void> {
   await http.delete(`/heroes/${id}`);
+}
+
+export async function searchHeroImages(name: string): Promise<HeroImageSearchResult> {
+  const response = await http.get<{
+    data: HeroImageCandidate[];
+    meta: { automatic_selection_id: string | null };
+  }>('/hero-images', { params: { name } });
+
+  return {
+    candidates: response.data.data,
+    automaticSelectionId: response.data.meta.automatic_selection_id,
+  };
 }
 
 export async function listMissions(): Promise<Mission[]> {

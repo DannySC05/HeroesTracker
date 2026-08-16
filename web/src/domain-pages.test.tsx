@@ -23,6 +23,7 @@ vi.mock('./domain/domain.api', () => ({
   createHero: vi.fn(),
   updateHero: vi.fn(),
   deleteHero: vi.fn(),
+  searchHeroImages: vi.fn(),
   listMissions: vi.fn(),
   getMission: vi.fn(),
   createMission: vi.fn(),
@@ -87,6 +88,10 @@ describe('módulos web del Hito 7', () => {
     vi.resetAllMocks();
     vi.mocked(domainApi.listHeroes).mockResolvedValue([hero]);
     vi.mocked(domainApi.getHero).mockResolvedValue(hero);
+    vi.mocked(domainApi.searchHeroImages).mockResolvedValue({
+      candidates: [],
+      automaticSelectionId: null,
+    });
     vi.mocked(domainApi.listMissions).mockResolvedValue([mission]);
     vi.mocked(domainApi.getMission).mockResolvedValue(mission);
   });
@@ -123,6 +128,38 @@ describe('módulos web del Hito 7', () => {
       ),
     );
     expect(await screen.findByText('Héroe creado correctamente.')).toBeVisible();
+  });
+
+  it('busca y asigna automáticamente una coincidencia exacta sin reemplazar imágenes existentes', async () => {
+    const externalImage = 'https://example.com/external-spider-man.jpg';
+    vi.mocked(domainApi.searchHeroImages).mockResolvedValue({
+      candidates: [
+        {
+          id: '620',
+          name: 'Spider-Man',
+          full_name: 'Peter Parker',
+          publisher: 'Marvel Comics',
+          image_url: externalImage,
+        },
+      ],
+      automaticSelectionId: '620',
+    });
+    const user = userEvent.setup();
+    renderPrivate('/app/heroes');
+
+    await user.click(await screen.findByRole('button', { name: /Nuevo héroe/i }));
+    await user.type(screen.getByLabelText('Nombre heroico'), 'Spider-Man');
+    await user.click(screen.getByLabelText('Nombre real'));
+
+    await waitFor(() => expect(screen.getByLabelText('URL de imagen')).toHaveValue(externalImage));
+
+    await user.click(screen.getByRole('button', { name: 'Cancelar' }));
+    await user.click(screen.getByRole('button', { name: 'Editar' }));
+    await user.click(screen.getByRole('button', { name: 'Buscar imagen' }));
+
+    await waitFor(() =>
+      expect(screen.getByLabelText('URL de imagen')).toHaveValue(hero.imagen_url),
+    );
   });
 
   it('mantiene a CONSULTA en modo de solo lectura', async () => {

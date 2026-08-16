@@ -12,6 +12,7 @@ const envSchema = z.object({
     .regex(/^\d+[smhd]$/)
     .default('2h'),
   BCRYPT_ROUNDS: z.coerce.number().int().min(10).max(15).default(12),
+  COMICVINE_API_KEY: z.string().trim().min(1).optional(),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

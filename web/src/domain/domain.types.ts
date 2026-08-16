@@ -12,13 +12,26 @@ export interface Hero {
   nombre_real: string;
   poder_principal: string;
   nivel_poder: number;
-  imagen_url: string;
+  imagen_url: string | null;
   estado: HeroState;
   created_at: string;
   updated_at: string;
 }
 
 export type HeroPayload = Omit<Hero, 'id' | 'created_at' | 'updated_at'>;
+
+export interface HeroImageCandidate {
+  id: string;
+  name: string;
+  full_name: string | null;
+  publisher: string | null;
+  image_url: string;
+}
+
+export interface HeroImageSearchResult {
+  candidates: HeroImageCandidate[];
+  automaticSelectionId: string | null;
+}
 
 export interface HeroSummary {
   id: string;

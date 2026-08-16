@@ -1290,6 +1290,24 @@ textarea:focus-visible {
   font-size: 0.9rem;
 }
 
+.resource-toolbar__meta {
+  display: grid;
+  flex: 0 0 auto;
+  justify-items: end;
+  gap: 0.25rem;
+}
+
+.comic-vine-credit {
+  color: var(--muted);
+  font-size: 0.55rem;
+  text-decoration: none;
+}
+
+.comic-vine-credit:hover {
+  color: var(--accent-strong);
+  text-decoration: underline;
+}
+
 .resource-state {
   display: grid;
   min-height: 21rem;
@@ -1867,8 +1885,7 @@ textarea:focus-visible {
 
 body {
   background:
-    radial-gradient(circle at 75% -10%, rgba(230, 36, 41, 0.12), transparent 28rem),
-    var(--bg);
+    radial-gradient(circle at 75% -10%, rgba(230, 36, 41, 0.12), transparent 28rem), var(--bg);
 }
 
 h1,
@@ -2027,8 +2044,7 @@ h3 {
 .login-panel {
   border-left-color: rgba(230, 36, 41, 0.25);
   background:
-    radial-gradient(circle at 50% 18%, rgba(230, 36, 41, 0.1), transparent 18rem),
-    #0d0d10;
+    radial-gradient(circle at 50% 18%, rgba(230, 36, 41, 0.1), transparent 18rem), #0d0d10;
 }
 
 .login-card {
@@ -2071,7 +2087,14 @@ h3 {
   background: linear-gradient(135deg, var(--accent-strong), #c51420);
   box-shadow: 0 12px 28px rgba(230, 36, 41, 0.22);
   text-transform: uppercase;
-  clip-path: polygon(0 0, calc(100% - 0.65rem) 0, 100% 0.65rem, 100% 100%, 0.65rem 100%, 0 calc(100% - 0.65rem));
+  clip-path: polygon(
+    0 0,
+    calc(100% - 0.65rem) 0,
+    100% 0.65rem,
+    100% 100%,
+    0.65rem 100%,
+    0 calc(100% - 0.65rem)
+  );
 }
 
 .primary-button:hover:not(:disabled),
@@ -2087,15 +2110,13 @@ h3 {
 
 .private-shell {
   background:
-    radial-gradient(circle at 90% 0%, rgba(230, 36, 41, 0.11), transparent 26rem),
-    #0a0a0d;
+    radial-gradient(circle at 90% 0%, rgba(230, 36, 41, 0.11), transparent 26rem), #0a0a0d;
 }
 
 .sidebar {
   border-right-color: rgba(230, 36, 41, 0.18);
   background:
-    linear-gradient(180deg, rgba(230, 36, 41, 0.09), transparent 14rem),
-    rgba(10, 10, 13, 0.97);
+    linear-gradient(180deg, rgba(230, 36, 41, 0.09), transparent 14rem), rgba(10, 10, 13, 0.97);
 }
 
 .sidebar::after {
@@ -2198,10 +2219,14 @@ h3 {
   min-height: 17rem;
   border-radius: 0.2rem;
   background:
-    radial-gradient(circle at 92% 10%, rgba(255, 255, 255, 0.09) 1px, transparent 1.5px) 0 0 / 12px 12px,
+    radial-gradient(circle at 92% 10%, rgba(255, 255, 255, 0.09) 1px, transparent 1.5px) 0 0 / 12px
+      12px,
     linear-gradient(145deg, rgba(230, 36, 41, 0.09), transparent 48%),
     #121216;
-  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .module-card::before {
@@ -2261,7 +2286,10 @@ h3 {
   position: relative;
   border-radius: 0.2rem;
   background: #121216;
-  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .hero-card::before {
@@ -2310,7 +2338,9 @@ h3 {
 .mission-card {
   border-radius: 0.2rem;
   background: #121216;
-  transition: border-color 180ms ease, transform 180ms ease;
+  transition:
+    border-color 180ms ease,
+    transform 180ms ease;
 }
 
 .mission-card:hover {
@@ -2351,6 +2381,150 @@ h3 {
 .form-message,
 .form-error {
   border-radius: 0.18rem;
+}
+
+.hero-image-search {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.hero-image-search__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.hero-image-search__heading > div,
+.hero-image-preview > div,
+.hero-image-option > span {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.hero-image-search__heading strong,
+.hero-image-preview strong {
+  color: var(--text);
+  font-size: 0.7rem;
+}
+
+.hero-image-search__heading small,
+.hero-image-preview small,
+.hero-image-option small {
+  color: var(--muted);
+  font-size: 0.58rem;
+  line-height: 1.45;
+}
+
+.hero-image-search__message {
+  margin: 0;
+  padding: 0.6rem 0.7rem;
+  border-left: 2px solid var(--cyan);
+  color: #b8c5cd;
+  background: rgba(77, 184, 255, 0.05);
+  font-size: 0.63rem;
+  line-height: 1.5;
+}
+
+.hero-image-options {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.hero-image-option {
+  display: grid;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid var(--line);
+  color: inherit;
+  background: #111115;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.hero-image-option:hover,
+.hero-image-option[aria-pressed='true'] {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.hero-image-option[aria-pressed='true'] {
+  box-shadow: inset 0 -3px var(--accent);
+}
+
+.hero-image-option img {
+  width: 100%;
+  height: 6.2rem;
+  object-fit: cover;
+}
+
+.hero-image-option > span {
+  min-width: 0;
+  padding: 0.55rem;
+}
+
+.hero-image-option strong {
+  overflow: hidden;
+  color: #fff;
+  font-size: 0.62rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hero-image-preview {
+  display: grid;
+  grid-template-columns: 5rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.65rem;
+  border: 1px solid var(--line);
+  background: #0e0e12;
+}
+
+.hero-image-preview img {
+  width: 5rem;
+  height: 4rem;
+  object-fit: cover;
+}
+
+.hero-image-preview button {
+  width: fit-content;
+  margin-top: 0.25rem;
+  padding: 0;
+  border: 0;
+  color: var(--accent-strong);
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.58rem;
+  font-weight: 800;
+}
+
+.hero-image-search > label {
+  display: grid;
+  gap: 0.4rem;
+  color: #8da0ab;
+  font-size: 0.62rem;
+  font-weight: 750;
+}
+
+@media (max-width: 600px) {
+  .hero-image-search__heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .hero-image-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 /* 404 */
@@ -2588,6 +2762,10 @@ h3 {
   .resource-toolbar {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .resource-toolbar__meta {
+    justify-items: start;
   }
 
   .resource-page__header .button {

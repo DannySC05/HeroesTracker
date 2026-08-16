@@ -1,11 +1,43 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type SyntheticEvent,
+} from 'react';
 
 import { getApiErrorMessage } from '../api/api-error';
 import { useAuth } from '../auth/auth-context';
 import { Modal } from '../components/Modal';
 import { ResourceState } from '../components/ResourceState';
-import { createHero, deleteHero, getHero, listHeroes, updateHero } from '../domain/domain.api';
-import { HERO_STATES, type Hero, type HeroPayload, type HeroState } from '../domain/domain.types';
+import {
+  createHero,
+  deleteHero,
+  getHero,
+  listHeroes,
+  searchHeroImages,
+  updateHero,
+} from '../domain/domain.api';
+import {
+  HERO_STATES,
+  type Hero,
+  type HeroImageCandidate,
+  type HeroPayload,
+  type HeroState,
+} from '../domain/domain.types';
+
+const HERO_PLACEHOLDER_URL = '/hero-placeholder.svg';
+
+function displayedHeroImage(imageUrl: string | null): string {
+  return imageUrl || HERO_PLACEHOLDER_URL;
+}
+
+function usePlaceholderOnError(event: SyntheticEvent<HTMLImageElement>) {
+  if (!event.currentTarget.src.endsWith(HERO_PLACEHOLDER_URL)) {
+    event.currentTarget.src = HERO_PLACEHOLDER_URL;
+  }
+}
 
 interface HeroFormState {
   nombre: string;
@@ -31,7 +63,7 @@ function heroToForm(hero: Hero): HeroFormState {
     nombreReal: hero.nombre_real,
     poderPrincipal: hero.poder_principal,
     nivelPoder: String(hero.nivel_poder),
-    imagenUrl: hero.imagen_url,
+    imagenUrl: hero.imagen_url ?? '',
     estado: hero.estado,
   };
 }
@@ -42,7 +74,7 @@ function formToPayload(form: HeroFormState): HeroPayload {
     nombre_real: form.nombreReal.trim(),
     poder_principal: form.poderPrincipal.trim(),
     nivel_poder: Number(form.nivelPoder),
-    imagen_url: form.imagenUrl.trim(),
+    imagen_url: form.imagenUrl.trim() || null,
     estado: form.estado,
   };
 }
@@ -63,6 +95,11 @@ export function HeroesPage() {
   const [formError, setFormError] = useState('');
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [imageCandidates, setImageCandidates] = useState<HeroImageCandidate[]>([]);
+  const [imageSearchStatus, setImageSearchStatus] = useState<'idle' | 'loading'>('idle');
+  const [imageSearchMessage, setImageSearchMessage] = useState('');
+  const imageRequestId = useRef(0);
+  const lastImageQuery = useRef('');
 
   const loadHeroes = useCallback(async (nombre = '') => {
     setStatus('loading');
@@ -122,6 +159,7 @@ export function HeroesPage() {
     setEditingHero(null);
     setForm(emptyForm);
     setFormError('');
+    resetImageSearch();
     setFormOpen(true);
   }
 
@@ -129,7 +167,67 @@ export function HeroesPage() {
     setEditingHero(hero);
     setForm(heroToForm(hero));
     setFormError('');
+    resetImageSearch();
     setFormOpen(true);
+  }
+
+  function resetImageSearch() {
+    imageRequestId.current += 1;
+    lastImageQuery.current = '';
+    setImageCandidates([]);
+    setImageSearchStatus('idle');
+    setImageSearchMessage('');
+  }
+
+  async function findHeroImage(force = false) {
+    const name = form.nombre.trim();
+    const normalizedQuery = name.toLowerCase();
+
+    if (name.length < 2) {
+      if (force) setImageSearchMessage('Escribe primero el nombre del héroe en inglés.');
+      return;
+    }
+
+    if (!force && lastImageQuery.current === normalizedQuery) return;
+    lastImageQuery.current = normalizedQuery;
+    const requestId = ++imageRequestId.current;
+    setImageSearchStatus('loading');
+    setImageSearchMessage('Buscando coincidencias…');
+
+    try {
+      const result = await searchHeroImages(name);
+      if (requestId !== imageRequestId.current) return;
+
+      setImageCandidates(result.candidates);
+      const automaticCandidate = result.candidates.find(
+        ({ id }) => id === result.automaticSelectionId,
+      );
+
+      if (automaticCandidate) {
+        setForm((current) =>
+          current.imagenUrl.trim()
+            ? current
+            : { ...current, imagenUrl: automaticCandidate.image_url },
+        );
+        setImageSearchMessage(
+          'Encontramos una coincidencia exacta. Una imagen elegida previamente siempre se conserva.',
+        );
+      } else if (result.candidates.length > 0) {
+        setImageSearchMessage('Encontramos varias opciones. Elige la imagen correcta.');
+      } else {
+        setImageSearchMessage(
+          'No encontramos imágenes. Puedes continuar con el placeholder o ingresar una URL.',
+        );
+      }
+    } catch (error) {
+      if (requestId !== imageRequestId.current) return;
+      setImageCandidates([]);
+      setImageSearchMessage(
+        getApiErrorMessage(error, 'La búsqueda de imágenes no está disponible en este momento.'),
+      );
+    } finally {
+      if (requestId === imageRequestId.current) setImageSearchStatus('idle');
+    }
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -221,9 +319,19 @@ export function HeroesPage() {
             </button>
           ) : null}
         </form>
-        <span className="resource-count">
-          <strong>{heroes.length}</strong> {heroes.length === 1 ? 'héroe' : 'héroes'}
-        </span>
+        <div className="resource-toolbar__meta">
+          <span className="resource-count">
+            <strong>{heroes.length}</strong> {heroes.length === 1 ? 'héroe' : 'héroes'}
+          </span>
+          <a
+            className="comic-vine-credit"
+            href="https://comicvine.gamespot.com/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Datos e imágenes: Comic Vine
+          </a>
+        </div>
       </section>
 
       {status === 'loading' ? (
@@ -258,7 +366,11 @@ export function HeroesPage() {
                 type="button"
                 onClick={() => void openDetail(hero)}
               >
-                <img src={hero.imagen_url} alt="" />
+                <img
+                  src={displayedHeroImage(hero.imagen_url)}
+                  alt=""
+                  onError={usePlaceholderOnError}
+                />
                 <span className={`status-pill status-pill--${hero.estado.toLowerCase()}`}>
                   {hero.estado}
                 </span>
@@ -310,7 +422,11 @@ export function HeroesPage() {
           onClose={() => setDetailHero(null)}
         >
           <div className="hero-detail">
-            <img src={detailHero.imagen_url} alt={`Retrato de ${detailHero.nombre}`} />
+            <img
+              src={displayedHeroImage(detailHero.imagen_url)}
+              alt={`Retrato de ${detailHero.nombre}`}
+              onError={usePlaceholderOnError}
+            />
             <div>
               {detailLoading ? <span className="detail-sync">Actualizando datos…</span> : null}
               <span className={`status-pill status-pill--${detailHero.estado.toLowerCase()}`}>
@@ -369,6 +485,7 @@ export function HeroesPage() {
                   maxLength={100}
                   value={form.nombre}
                   onChange={(event) => setForm({ ...form, nombre: event.target.value })}
+                  onBlur={() => void findHeroImage()}
                 />
               </label>
               <label>
@@ -415,16 +532,85 @@ export function HeroesPage() {
                   ))}
                 </select>
               </label>
-              <label className="form-grid__wide">
-                URL de imagen
-                <input
-                  required
-                  type="url"
-                  placeholder="https://..."
-                  value={form.imagenUrl}
-                  onChange={(event) => setForm({ ...form, imagenUrl: event.target.value })}
-                />
-              </label>
+              <div className="form-grid__wide hero-image-search">
+                <div className="hero-image-search__heading">
+                  <div>
+                    <strong>Imagen del héroe</strong>
+                    <small>Búsqueda automática únicamente por nombres en inglés.</small>
+                  </div>
+                  <button
+                    className="button button--secondary"
+                    type="button"
+                    disabled={imageSearchStatus === 'loading'}
+                    onClick={() => void findHeroImage(true)}
+                  >
+                    {imageSearchStatus === 'loading' ? 'Buscando…' : 'Buscar imagen'}
+                  </button>
+                </div>
+
+                {imageSearchMessage ? (
+                  <p className="hero-image-search__message" role="status">
+                    {imageSearchMessage}
+                  </p>
+                ) : null}
+
+                {imageCandidates.length > 0 ? (
+                  <div className="hero-image-options" aria-label="Imágenes encontradas">
+                    {imageCandidates.map((candidate) => (
+                      <button
+                        className="hero-image-option"
+                        type="button"
+                        aria-pressed={form.imagenUrl === candidate.image_url}
+                        key={candidate.id}
+                        onClick={() => {
+                          setForm({ ...form, imagenUrl: candidate.image_url });
+                          setImageSearchMessage(`Imagen de ${candidate.name} seleccionada.`);
+                        }}
+                      >
+                        <img src={candidate.image_url} alt="" onError={usePlaceholderOnError} />
+                        <span>
+                          <strong>{candidate.name}</strong>
+                          <small>{candidate.full_name || candidate.publisher || 'Personaje'}</small>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+
+                <div className="hero-image-preview">
+                  <img
+                    src={displayedHeroImage(form.imagenUrl || null)}
+                    alt="Vista previa del héroe"
+                    onError={usePlaceholderOnError}
+                  />
+                  <div>
+                    <strong>
+                      {form.imagenUrl ? 'Imagen seleccionada' : 'Sin imagen disponible'}
+                    </strong>
+                    <small>
+                      {form.imagenUrl
+                        ? 'Puedes conservarla, cambiarla o eliminarla.'
+                        : 'Se utilizará el placeholder de Heroes Tracker.'}
+                    </small>
+                    {form.imagenUrl ? (
+                      <button type="button" onClick={() => setForm({ ...form, imagenUrl: '' })}>
+                        Quitar imagen
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+
+                <label>
+                  URL de imagen
+                  <input
+                    aria-label="URL de imagen"
+                    type="url"
+                    placeholder="https://... (opcional)"
+                    value={form.imagenUrl}
+                    onChange={(event) => setForm({ ...form, imagenUrl: event.target.value })}
+                  />
+                </label>
+              </div>
             </div>
             <div className="form-actions">
               <button

@@ -28,5 +28,9 @@ La primera vez, copiar el contenido de
 ejecutarlo. Después, `db:check` confirma que la conexión funciona y que existen
 las cuatro tablas esperadas.
 
+Si la base ya fue creada, ejecutar también
+`database/migrations/002_optional_hero_image.sql`. Esta migración permite guardar
+héroes originales sin imagen y mantener el placeholder en la interfaz.
+
 El seed puede repetirse sin crear duplicados. Actualiza los dos usuarios de prueba,
 los ocho héroes y las seis misiones identificados por claves estables.

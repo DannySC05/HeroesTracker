@@ -5,7 +5,10 @@ API REST de Heroes Tracker construida con Express, TypeScript, PostgreSQL y JWT.
 ## Preparación
 
 1. Copiar `backend/.env.example` como `backend/.env`.
-2. Configurar `DATABASE_URL`, `JWT_SECRET` y las demás variables.
+2. Configurar `DATABASE_URL`, `JWT_SECRET` y las demás variables. Para habilitar
+   la búsqueda automática de imágenes, añadir la clave de Comic Vine en
+   `COMICVINE_API_KEY`. La clave permanece en el backend y no debe configurarse
+   en Vercel ni exponerse al navegador.
 3. Ejecutar `database/migrations/001_initial_schema.sql` una vez en el SQL Editor
    de Supabase y cargar los datos iniciales desde la raíz:
 
@@ -37,6 +40,7 @@ incluyen la contraseña ni su hash.
 | GET                | `/api/heroes`         | Sí         | Sí      |
 | GET                | `/api/heroes/:id`     | Sí         | Sí      |
 | POST, PUT y DELETE | `/api/heroes[/:id]`   | No (`403`) | Sí      |
+| GET                | `/api/hero-images`    | No (`403`) | Sí      |
 | GET                | `/api/misiones`       | Sí         | Sí      |
 | GET                | `/api/misiones/:id`   | Sí         | Sí      |
 | POST, PUT y DELETE | `/api/misiones[/:id]` | No (`403`) | Sí      |
@@ -44,6 +48,10 @@ incluyen la contraseña ni su hash.
 Los listados devuelven `{ data, meta: { total } }`. La búsqueda de héroes acepta
 `?nombre=texto`; es parcial y no distingue mayúsculas. `PUT` exige todos los
 campos editables del recurso.
+
+La búsqueda de imágenes acepta `?name=Spider-Man`, consulta únicamente personajes,
+limita y almacena temporalmente los resultados, y nunca expone la clave de Comic
+Vine al navegador. Comic Vine solo permite uso no comercial y requiere atribución.
 
 ## Cómo comprobarlo
 

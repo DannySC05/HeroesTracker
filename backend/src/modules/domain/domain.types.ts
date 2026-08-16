@@ -12,7 +12,7 @@ export interface HeroRecord {
   nombreReal: string;
   poderPrincipal: string;
   nivelPoder: number;
-  imagenUrl: string;
+  imagenUrl: string | null;
   estado: HeroState;
   createdAt: Date;
   updatedAt: Date;
@@ -23,7 +23,7 @@ export interface HeroInput {
   nombreReal: string;
   poderPrincipal: string;
   nivelPoder: number;
-  imagenUrl: string;
+  imagenUrl: string | null;
   estado: HeroState;
 }
 

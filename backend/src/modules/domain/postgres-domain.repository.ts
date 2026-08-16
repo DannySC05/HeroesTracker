@@ -26,7 +26,7 @@ interface HeroRow extends QueryResultRow {
   nombre_real: string;
   poder_principal: string;
   nivel_poder: number;
-  imagen_url: string;
+  imagen_url: string | null;
   estado: string;
   created_at: Date;
   updated_at: Date;
