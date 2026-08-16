@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -95,6 +95,49 @@ describe('módulos web del Hito 7', () => {
     });
     vi.mocked(domainApi.listMissions).mockResolvedValue([mission]);
     vi.mocked(domainApi.getMission).mockResolvedValue(mission);
+  });
+
+  it.each([
+    ['ADMIN', adminUser],
+    ['CONSULTA', consultaUser],
+  ])('muestra el resumen operativo para el perfil %s', async (_role, authenticatedUser) => {
+    vi.mocked(domainApi.listHeroes).mockResolvedValue([
+      hero,
+      { ...hero, id: '10000000-0000-4000-8000-000000000002', nombre: 'Iron Man' },
+      {
+        ...hero,
+        id: '10000000-0000-4000-8000-000000000003',
+        nombre: 'Hawkeye',
+        estado: 'INACTIVO',
+      },
+    ]);
+    vi.mocked(domainApi.listMissions).mockResolvedValue([
+      mission,
+      {
+        ...mission,
+        id: '20000000-0000-4000-8000-000000000002',
+        titulo: 'Operación completada',
+        estado: 'COMPLETADA',
+      },
+      {
+        ...mission,
+        id: '20000000-0000-4000-8000-000000000003',
+        titulo: 'Operación completada II',
+        estado: 'COMPLETADA',
+      },
+    ]);
+
+    renderPrivate('/app', authenticatedUser);
+
+    expect(await screen.findByText('Datos actualizados')).toBeVisible();
+
+    const activeHeroes = screen.getByRole('link', { name: /Héroes activos/i });
+    const completedMissions = screen.getByRole('link', { name: /Misiones completadas/i });
+    const missionsInProgress = screen.getByRole('link', { name: /Misiones en progreso/i });
+
+    expect(within(activeHeroes).getByText('2')).toBeVisible();
+    expect(within(completedMissions).getByText('2')).toBeVisible();
+    expect(within(missionsInProgress).getByText('1')).toBeVisible();
   });
 
   it('lista y busca héroes mediante la API', async () => {

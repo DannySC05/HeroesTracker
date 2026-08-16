@@ -1,10 +1,62 @@
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router';
 import { useAuth } from '../auth/auth-context';
 import { Icon } from '../components/Icon';
+import { listHeroes, listMissions } from '../domain/domain.api';
+
+interface DashboardMetrics {
+  activeHeroes: number;
+  completedMissions: number;
+  missionsInProgress: number;
+}
+
+const emptyMetrics: DashboardMetrics = {
+  activeHeroes: 0,
+  completedMissions: 0,
+  missionsInProgress: 0,
+};
 
 export function DashboardPage() {
   const { user } = useAuth();
   const firstName = user?.nombre.split(/\s+/)[0] || 'agente';
   const isAdmin = user?.rol === 'ADMIN';
+  const [metrics, setMetrics] = useState<DashboardMetrics>(emptyMetrics);
+  const [metricsStatus, setMetricsStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadMetrics() {
+      setMetricsStatus('loading');
+
+      try {
+        const [heroes, missions] = await Promise.all([listHeroes(), listMissions()]);
+
+        if (!isMounted) return;
+
+        setMetrics({
+          activeHeroes: heroes.filter((hero) => hero.estado === 'ACTIVO').length,
+          completedMissions: missions.filter((mission) => mission.estado === 'COMPLETADA').length,
+          missionsInProgress: missions.filter((mission) => mission.estado === 'EN_PROGRESO').length,
+        });
+        setMetricsStatus('ready');
+      } catch {
+        if (isMounted) setMetricsStatus('error');
+      }
+    }
+
+    void loadMetrics();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const metricValue = (value: number) => {
+    if (metricsStatus === 'loading') return '…';
+    if (metricsStatus === 'error') return '—';
+    return value.toString();
+  };
 
   return (
     <main className="dashboard">
@@ -24,6 +76,55 @@ export function DashboardPage() {
               ? 'Podrás crear, actualizar y cerrar operaciones.'
               : 'Podrás explorar toda la información disponible.'}
           </small>
+        </div>
+      </section>
+
+      <section className="dashboard__section" aria-labelledby="metrics-title">
+        <div className="section-heading">
+          <div>
+            <p>Estado general</p>
+            <h2 id="metrics-title">Resumen operativo</h2>
+          </div>
+          <span aria-live="polite">
+            {metricsStatus === 'loading' && 'Actualizando indicadores'}
+            {metricsStatus === 'ready' && 'Datos actualizados'}
+            {metricsStatus === 'error' && 'Datos no disponibles'}
+          </span>
+        </div>
+
+        <div className="metrics-grid" aria-label="Indicadores operativos">
+          <Link className="metric-card metric-card--heroes" to="/app/heroes">
+            <span className="metric-card__icon">
+              <Icon name="users" />
+            </span>
+            <span className="metric-card__content">
+              <strong>{metricValue(metrics.activeHeroes)}</strong>
+              <span>Héroes activos</span>
+              <small>Disponibles para operaciones</small>
+            </span>
+          </Link>
+
+          <Link className="metric-card metric-card--completed" to="/app/misiones">
+            <span className="metric-card__icon">
+              <Icon name="check" />
+            </span>
+            <span className="metric-card__content">
+              <strong>{metricValue(metrics.completedMissions)}</strong>
+              <span>Misiones completadas</span>
+              <small>Operaciones finalizadas</small>
+            </span>
+          </Link>
+
+          <Link className="metric-card metric-card--progress" to="/app/misiones">
+            <span className="metric-card__icon">
+              <Icon name="target" />
+            </span>
+            <span className="metric-card__content">
+              <strong>{metricValue(metrics.missionsInProgress)}</strong>
+              <span>Misiones en progreso</span>
+              <small>Operaciones actualmente activas</small>
+            </span>
+          </Link>
         </div>
       </section>
 
@@ -104,4 +205,3 @@ export function DashboardPage() {
     </main>
   );
 }
-import { Link } from 'react-router';

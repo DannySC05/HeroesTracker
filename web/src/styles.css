@@ -933,6 +933,111 @@ textarea:focus-visible {
   margin-top: clamp(2.3rem, 4vw, 3.7rem);
 }
 
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.metric-card {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 1rem;
+  overflow: hidden;
+  padding: clamp(1.2rem, 2.4vw, 1.65rem);
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--cyan);
+  border-radius: 0.2rem;
+  background:
+    radial-gradient(circle at 92% 12%, rgba(255, 255, 255, 0.08) 1px, transparent 1.5px) 0 0 / 12px
+      12px,
+    linear-gradient(145deg, rgba(77, 184, 255, 0.08), transparent 58%),
+    #121216;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.metric-card:hover {
+  border-color: rgba(255, 255, 255, 0.24);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.28);
+  transform: translateY(-3px);
+}
+
+.metric-card--completed {
+  border-top-color: #50c878;
+  background:
+    radial-gradient(circle at 92% 12%, rgba(255, 255, 255, 0.08) 1px, transparent 1.5px) 0 0 / 12px
+      12px,
+    linear-gradient(145deg, rgba(80, 200, 120, 0.08), transparent 58%),
+    #121216;
+}
+
+.metric-card--progress {
+  border-top-color: var(--accent);
+  background:
+    radial-gradient(circle at 92% 12%, rgba(255, 255, 255, 0.08) 1px, transparent 1.5px) 0 0 / 12px
+      12px,
+    linear-gradient(145deg, rgba(230, 36, 41, 0.09), transparent 58%),
+    #121216;
+}
+
+.metric-card__icon {
+  display: grid;
+  width: 3rem;
+  height: 3rem;
+  flex: 0 0 auto;
+  place-items: center;
+  color: #fff;
+  background: rgba(77, 184, 255, 0.18);
+  clip-path: polygon(12% 0, 100% 0, 88% 100%, 0 100%);
+}
+
+.metric-card--completed .metric-card__icon {
+  background: rgba(80, 200, 120, 0.18);
+}
+
+.metric-card--progress .metric-card__icon {
+  background: rgba(230, 36, 41, 0.2);
+}
+
+.metric-card__icon svg {
+  width: 1.3rem;
+}
+
+.metric-card__content {
+  display: grid;
+  min-width: 0;
+  gap: 0.2rem;
+}
+
+.metric-card__content strong {
+  color: #fff;
+  font-size: clamp(1.9rem, 3vw, 2.65rem);
+  font-weight: 900;
+  letter-spacing: -0.055em;
+  line-height: 1;
+}
+
+.metric-card__content > span {
+  color: #eef2f4;
+  font-size: 0.78rem;
+  font-weight: 850;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+}
+
+.metric-card__content small {
+  overflow: hidden;
+  color: #718896;
+  font-size: 0.62rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .section-heading {
   display: flex;
   align-items: flex-end;
@@ -3002,6 +3107,10 @@ h3 {
 
   .module-card {
     min-height: 15rem;
+  }
+
+  .metrics-grid {
+    grid-template-columns: 1fr;
   }
 
   .resource-page {
