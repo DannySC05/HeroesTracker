@@ -13,7 +13,8 @@ una API REST, una aplicación web y una aplicación móvil.
 - Hito 5: colección Postman automatizada completada y verificada con Supabase.
 - Hito 6: autenticación, rutas protegidas y base visual web completadas.
 - Hito 7: listado, detalle y CRUD web de héroes y misiones completados.
-- Aplicación móvil: pendiente de su hito correspondiente.
+- Hito 8: aplicación móvil Expo con sesión, navegación, héroes, misiones,
+  favoritos y operaciones por roles completada.
 
 ## Estructura
 
@@ -31,8 +32,9 @@ una API REST, una aplicación web y una aplicación móvil.
 - Node.js 22.13 o superior.
 - pnpm 10 o superior; el lockfile se generó con pnpm 11.19.
 
-Expo SDK 57 requiere Node.js 22.13 como mínimo. El archivo `.nvmrc` fija la línea
-LTS recomendada para el proyecto.
+La aplicación móvil usa Expo SDK 54 y React Native 0.81, la combinación compatible
+con la versión pública actual de Expo Go para iPhone. El archivo `.nvmrc` fija
+Node.js 22 LTS, que también se usa para Android y el resto del monorepo.
 
 ## Instalación
 
@@ -85,6 +87,9 @@ instrucciones se encuentran en [postman/](./postman/README.md).
 
 La API se despliega en Render mediante `render.yaml` y la aplicación Vite en
 Vercel usando `web/vercel.json`.
+
+La aplicación móvil utiliza Expo y está preparada para EAS Build mediante
+`mobile/eas.json`. Sus instrucciones están en `mobile/README.md`.
 
 ### Render
 
