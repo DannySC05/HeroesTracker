@@ -1,9 +1,38 @@
+import { BrowserRouter, Route, Routes } from 'react-router';
+
+import { AuthProvider } from './auth/AuthProvider';
+import { AppLayout } from './layouts/AppLayout';
+import { DashboardPage } from './pages/DashboardPage';
+import { LoginPage } from './pages/LoginPage';
+import { NotFoundPage } from './pages/NotFoundPage';
+import { ProtectedRoute, PublicOnlyRoute, RootRedirect } from './routes/RouteGuards';
+
+export function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/" element={<RootRedirect />} />
+
+      <Route element={<PublicOnlyRoute />}>
+        <Route path="/login" element={<LoginPage />} />
+      </Route>
+
+      <Route element={<ProtectedRoute />}>
+        <Route path="/app" element={<AppLayout />}>
+          <Route index element={<DashboardPage />} />
+        </Route>
+      </Route>
+
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
+  );
+}
+
 export function App() {
   return (
-    <main className="app-shell">
-      <p className="eyebrow">Hito 1</p>
-      <h1>Heroes Tracker</h1>
-      <p>La aplicación web está preparada para comenzar su implementación.</p>
-    </main>
+    <BrowserRouter>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </BrowserRouter>
   );
 }

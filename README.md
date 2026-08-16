@@ -11,7 +11,8 @@ una API REST, una aplicación web y una aplicación móvil.
 - Hito 3: autenticación JWT y autorización por roles completadas.
 - Hito 4: CRUD protegido de héroes y misiones completado y verificado con Supabase.
 - Hito 5: colección Postman automatizada completada y verificada con Supabase.
-- Interfaces web/móvil: pendientes de sus hitos correspondientes.
+- Hito 6: autenticación, rutas protegidas y base visual web completadas.
+- CRUD web y aplicación móvil: pendientes de sus hitos correspondientes.
 
 ## Estructura
 
