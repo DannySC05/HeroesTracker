@@ -8,7 +8,7 @@ implementarlos dentro de la arquitectura acordada.
 | API REST centralizada                              | Express + TypeScript bajo `/api`                     |                    3-4 |
 | JWT; solo register/login públicos                  | Middleware JWT y revocación por `jti`                |                      3 |
 | Roles `ADMIN` y `CONSULTA`                         | Matriz de permisos; escrituras de dominio solo ADMIN |                      3 |
-| Entidades usuario, héroe y misión                  | PostgreSQL + Prisma, UUID y constraints              |                      2 |
+| Entidades usuario, héroe y misión                  | PostgreSQL + `pg`, UUID y constraints                |                      2 |
 | Email y héroe únicos                               | Índices únicos sin distinguir mayúsculas             |                    2-4 |
 | Poder entre 1 y 100                                | `CHECK` en BD y validación Zod                       |                    2-4 |
 | Misión asociada a héroe existente                  | FK obligatoria y validación de servicio              |                    2-4 |
@@ -34,6 +34,6 @@ implementarlos dentro de la arquitectura acordada.
 - Timestamps de auditoría básicos en las entidades.
 - Restricción de borrado de héroes con misiones (`409`).
 - Búsqueda por query `nombre` y orden determinista de listados.
-- TypeScript, pnpm, Prisma, Zod y Axios como elecciones de implementación.
+- TypeScript, pnpm, `pg`, Zod y Axios como elecciones de implementación.
 
 Estas extensiones no sustituyen ni reducen los requisitos de la evaluación.

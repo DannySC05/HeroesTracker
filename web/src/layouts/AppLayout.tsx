@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Outlet } from 'react-router';
+import { NavLink, Outlet } from 'react-router';
 
 import { useAuth } from '../auth/auth-context';
 import { Brand } from '../components/Brand';
@@ -46,20 +46,31 @@ export function AppLayout() {
 
         <nav className="sidebar__nav" aria-label="Navegación principal">
           <p className="sidebar__label">Centro de control</p>
-          <a className="sidebar__link sidebar__link--active" href="/app" aria-current="page">
+          <NavLink
+            className={({ isActive }) => `sidebar__link${isActive ? ' sidebar__link--active' : ''}`}
+            to="/app"
+            end
+            onClick={() => setNavigationOpen(false)}
+          >
             <Icon name="grid" />
             <span>Resumen</span>
-          </a>
-          <button className="sidebar__link" type="button" disabled>
+          </NavLink>
+          <NavLink
+            className={({ isActive }) => `sidebar__link${isActive ? ' sidebar__link--active' : ''}`}
+            to="/app/heroes"
+            onClick={() => setNavigationOpen(false)}
+          >
             <Icon name="users" />
             <span>Héroes</span>
-            <small>Próximo</small>
-          </button>
-          <button className="sidebar__link" type="button" disabled>
+          </NavLink>
+          <NavLink
+            className={({ isActive }) => `sidebar__link${isActive ? ' sidebar__link--active' : ''}`}
+            to="/app/misiones"
+            onClick={() => setNavigationOpen(false)}
+          >
             <Icon name="target" />
             <span>Misiones</span>
-            <small>Próximo</small>
-          </button>
+          </NavLink>
         </nav>
 
         <div className="sidebar__security">

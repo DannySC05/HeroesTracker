@@ -30,8 +30,15 @@ backend.
 - Navegación responsive para escritorio y móvil.
 - Estados de carga, error de credenciales y API no disponible.
 
-Los módulos de héroes y misiones se incorporan en el Hito 7. En este hito se
-muestran únicamente como la siguiente capacidad del layout privado.
+## Funcionalidad del Hito 7
+
+- Listado, búsqueda y detalle de héroes desde la API.
+- CRUD de héroes disponible únicamente para `ADMIN`.
+- Listado, filtros y detalle de misiones con su héroe asignado.
+- CRUD de misiones y selector de héroes para `ADMIN`.
+- Modo de solo lectura para `CONSULTA`.
+- Estados explícitos de carga, error, ausencia de datos y confirmación.
+- Formularios responsive con validación nativa y errores de la API.
 
 ## Verificación
 

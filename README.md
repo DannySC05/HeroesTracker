@@ -12,7 +12,8 @@ una API REST, una aplicación web y una aplicación móvil.
 - Hito 4: CRUD protegido de héroes y misiones completado y verificado con Supabase.
 - Hito 5: colección Postman automatizada completada y verificada con Supabase.
 - Hito 6: autenticación, rutas protegidas y base visual web completadas.
-- CRUD web y aplicación móvil: pendientes de sus hitos correspondientes.
+- Hito 7: listado, detalle y CRUD web de héroes y misiones completados.
+- Aplicación móvil: pendiente de su hito correspondiente.
 
 ## Estructura
 

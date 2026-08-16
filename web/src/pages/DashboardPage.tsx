@@ -30,14 +30,14 @@ export function DashboardPage() {
       <section className="dashboard__section" aria-labelledby="modules-title">
         <div className="section-heading">
           <div>
-            <p>Próxima capacidad</p>
+            <p>Capacidades activas</p>
             <h2 id="modules-title">Módulos operativos</h2>
           </div>
-          <span>Preparados para el Hito 7</span>
+          <span>Conectados a la API</span>
         </div>
 
         <div className="module-grid">
-          <article className="module-card module-card--heroes">
+          <Link className="module-card module-card--heroes" to="/app/heroes">
             <span className="module-card__icon">
               <Icon name="users" />
             </span>
@@ -47,11 +47,11 @@ export function DashboardPage() {
               <p>Consulta perfiles, capacidades, nivel de poder y estado operativo.</p>
             </div>
             <span className="module-card__status">
-              <i /> Integración pendiente
+              <i /> Abrir directorio
             </span>
-          </article>
+          </Link>
 
-          <article className="module-card module-card--missions">
+          <Link className="module-card module-card--missions" to="/app/misiones">
             <span className="module-card__icon">
               <Icon name="target" />
             </span>
@@ -61,9 +61,9 @@ export function DashboardPage() {
               <p>Supervisa asignaciones, fechas, peligro y avance de cada operación.</p>
             </div>
             <span className="module-card__status">
-              <i /> Integración pendiente
+              <i /> Abrir operaciones
             </span>
-          </article>
+          </Link>
         </div>
       </section>
 
@@ -104,3 +104,4 @@ export function DashboardPage() {
     </main>
   );
 }
+import { Link } from 'react-router';
