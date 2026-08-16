@@ -107,6 +107,28 @@ describe('módulos web del Hito 7', () => {
     await waitFor(() => expect(domainApi.listHeroes).toHaveBeenLastCalledWith('Spider'));
   });
 
+  it('muestra misiones activas en la tarjeta y el historial completado en el detalle', async () => {
+    const completedMission: Mission = {
+      ...mission,
+      id: '20000000-0000-4000-8000-000000000003',
+      titulo: 'Rescate completado',
+      estado: 'COMPLETADA',
+      fecha: '2026-08-10',
+    };
+    vi.mocked(domainApi.listMissions).mockResolvedValue([mission, completedMission]);
+    const user = userEvent.setup();
+    renderPrivate('/app/heroes');
+
+    expect(await screen.findByText(mission.titulo)).toBeVisible();
+    expect(screen.getByText('1', { selector: '.hero-card__missions strong' })).toBeVisible();
+
+    await user.click(screen.getByRole('button', { name: 'Ver detalle' }));
+
+    const dialog = await screen.findByRole('dialog');
+    expect(dialog).toHaveTextContent('Historial de misiones');
+    expect(dialog).toHaveTextContent(completedMission.titulo);
+  });
+
   it('permite a ADMIN crear un héroe desde el formulario', async () => {
     const createdHero = { ...hero, id: '10000000-0000-4000-8000-000000000002', nombre: 'Nova' };
     vi.mocked(domainApi.createHero).mockResolvedValue(createdHero);

@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type FormEvent,
@@ -16,6 +17,7 @@ import {
   deleteHero,
   getHero,
   listHeroes,
+  listMissions,
   searchHeroImages,
   updateHero,
 } from '../domain/domain.api';
@@ -25,6 +27,7 @@ import {
   type HeroImageCandidate,
   type HeroPayload,
   type HeroState,
+  type Mission,
 } from '../domain/domain.types';
 
 const HERO_PLACEHOLDER_URL = '/hero-placeholder.svg';
@@ -79,10 +82,25 @@ function formToPayload(form: HeroFormState): HeroPayload {
   };
 }
 
+function formatMissionDate(value: string): string {
+  return new Intl.DateTimeFormat('es-EC', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(new Date(`${value}T00:00:00.000Z`));
+}
+
+interface HeroMissionGroup {
+  active: Mission[];
+  history: Mission[];
+}
+
 export function HeroesPage() {
   const { user } = useAuth();
   const isAdmin = user?.rol === 'ADMIN';
   const [heroes, setHeroes] = useState<Hero[]>([]);
+  const [missions, setMissions] = useState<Mission[]>([]);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [search, setSearch] = useState('');
   const [appliedSearch, setAppliedSearch] = useState('');
@@ -101,10 +119,15 @@ export function HeroesPage() {
   const imageRequestId = useRef(0);
   const lastImageQuery = useRef('');
 
-  const loadHeroes = useCallback(async (nombre = '') => {
+  const loadResources = useCallback(async (nombre = '') => {
     setStatus('loading');
     try {
-      setHeroes(await listHeroes(nombre || undefined));
+      const [heroData, missionData] = await Promise.all([
+        listHeroes(nombre || undefined),
+        listMissions(),
+      ]);
+      setHeroes(heroData);
+      setMissions(missionData);
       setStatus('ready');
     } catch {
       setStatus('error');
@@ -114,10 +137,11 @@ export function HeroesPage() {
   useEffect(() => {
     let active = true;
 
-    listHeroes()
-      .then((data) => {
+    Promise.all([listHeroes(), listMissions()])
+      .then(([heroData, missionData]) => {
         if (active) {
-          setHeroes(data);
+          setHeroes(heroData);
+          setMissions(missionData);
           setStatus('ready');
         }
       })
@@ -130,17 +154,32 @@ export function HeroesPage() {
     };
   }, []);
 
+  const missionsByHero = useMemo(() => {
+    const groups = new Map<string, HeroMissionGroup>();
+
+    for (const mission of missions) {
+      const group = groups.get(mission.superheroe_id) ?? { active: [], history: [] };
+      if (mission.estado === 'EN_PROGRESO') group.active.push(mission);
+      if (mission.estado === 'COMPLETADA') group.history.push(mission);
+      groups.set(mission.superheroe_id, group);
+    }
+
+    return groups;
+  }, [missions]);
+
+  const detailMissionGroup = detailHero ? missionsByHero.get(detailHero.id) : undefined;
+
   async function handleSearch(event: FormEvent) {
     event.preventDefault();
     const nextSearch = search.trim();
     setAppliedSearch(nextSearch);
-    await loadHeroes(nextSearch);
+    await loadResources(nextSearch);
   }
 
   function clearSearch() {
     setSearch('');
     setAppliedSearch('');
-    void loadHeroes();
+    void loadResources();
   }
 
   async function openDetail(hero: Hero) {
@@ -345,7 +384,7 @@ export function HeroesPage() {
           kind="error"
           title="No pudimos cargar los héroes"
           message="Comprueba que el backend esté disponible y vuelve a intentarlo."
-          onRetry={() => void loadHeroes(appliedSearch)}
+          onRetry={() => void loadResources(appliedSearch)}
         />
       ) : heroes.length === 0 ? (
         <ResourceState
@@ -359,59 +398,87 @@ export function HeroesPage() {
         />
       ) : (
         <section className="hero-grid" aria-label="Listado de héroes">
-          {heroes.map((hero) => (
-            <article className="hero-card" key={hero.id}>
-              <button
-                className="hero-card__visual"
-                type="button"
-                onClick={() => void openDetail(hero)}
-              >
-                <img
-                  src={displayedHeroImage(hero.imagen_url)}
-                  alt=""
-                  onError={usePlaceholderOnError}
-                />
-                <span className={`status-pill status-pill--${hero.estado.toLowerCase()}`}>
-                  {hero.estado}
-                </span>
-                <span className="power-meter">
-                  <i style={{ width: `${hero.nivel_poder}%` }} />
-                </span>
-              </button>
-              <div className="hero-card__body">
-                <div>
-                  <p>{hero.nombre_real}</p>
-                  <h2>{hero.nombre}</h2>
-                </div>
-                <p className="hero-card__power">{hero.poder_principal}</p>
-                <div className="hero-card__footer">
-                  <span>
-                    <strong>{hero.nivel_poder}</strong>/100 poder
+          {heroes.map((hero) => {
+            const activeMissions = missionsByHero.get(hero.id)?.active ?? [];
+
+            return (
+              <article className="hero-card" key={hero.id}>
+                <button
+                  className="hero-card__visual"
+                  type="button"
+                  onClick={() => void openDetail(hero)}
+                >
+                  <img
+                    src={displayedHeroImage(hero.imagen_url)}
+                    alt=""
+                    onError={usePlaceholderOnError}
+                  />
+                  <span className={`status-pill status-pill--${hero.estado.toLowerCase()}`}>
+                    {hero.estado}
                   </span>
-                  <div className="card-actions">
-                    <button type="button" onClick={() => void openDetail(hero)}>
-                      Ver detalle
-                    </button>
-                    {isAdmin ? (
-                      <>
-                        <button type="button" onClick={() => openEdit(hero)}>
-                          Editar
-                        </button>
-                        <button
-                          className="card-actions__danger"
-                          type="button"
-                          disabled={deletingId === hero.id}
-                          onClick={() => void handleDelete(hero)}
-                        >
-                          {deletingId === hero.id ? 'Eliminando…' : 'Eliminar'}
-                        </button>
-                      </>
+                  <span className="power-meter">
+                    <i style={{ width: `${hero.nivel_poder}%` }} />
+                  </span>
+                </button>
+                <div className="hero-card__body">
+                  <div>
+                    <p>{hero.nombre_real}</p>
+                    <h2>{hero.nombre}</h2>
+                  </div>
+                  <p className="hero-card__power">{hero.poder_principal}</p>
+                  <section
+                    className="hero-card__missions"
+                    aria-label={`Misiones de ${hero.nombre}`}
+                  >
+                    <div>
+                      <span>Misiones activas</span>
+                      <strong>{activeMissions.length}</strong>
+                    </div>
+                    {activeMissions.length ? (
+                      <ul>
+                        {activeMissions.slice(0, 2).map((mission) => (
+                          <li key={mission.id}>
+                            <span>{mission.titulo}</span>
+                            <small>{mission.nivel_peligro}</small>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p>Sin operaciones en progreso.</p>
+                    )}
+                    {activeMissions.length > 2 ? (
+                      <small>+{activeMissions.length - 2} adicionales</small>
                     ) : null}
+                  </section>
+                  <div className="hero-card__footer">
+                    <span>
+                      <strong>{hero.nivel_poder}</strong>/100 poder
+                    </span>
+                    <div className="card-actions">
+                      <button type="button" onClick={() => void openDetail(hero)}>
+                        Ver detalle
+                      </button>
+                      {isAdmin ? (
+                        <>
+                          <button type="button" onClick={() => openEdit(hero)}>
+                            Editar
+                          </button>
+                          <button
+                            className="card-actions__danger"
+                            type="button"
+                            disabled={deletingId === hero.id}
+                            onClick={() => void handleDelete(hero)}
+                          >
+                            {deletingId === hero.id ? 'Eliminando…' : 'Eliminar'}
+                          </button>
+                        </>
+                      ) : null}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </article>
-          ))}
+              </article>
+            );
+          })}
         </section>
       )}
 
@@ -446,6 +513,31 @@ export function HeroesPage() {
                   <dd>{detailHero.nivel_poder} / 100</dd>
                 </div>
               </dl>
+              <section className="hero-mission-history">
+                <div className="hero-mission-history__heading">
+                  <div>
+                    <span>Registro operativo</span>
+                    <h3>Historial de misiones</h3>
+                  </div>
+                  <strong>{detailMissionGroup?.history.length ?? 0}</strong>
+                </div>
+                {detailMissionGroup?.history.length ? (
+                  <ol>
+                    {detailMissionGroup.history.map((mission) => (
+                      <li key={mission.id}>
+                        <time dateTime={mission.fecha}>{formatMissionDate(mission.fecha)}</time>
+                        <div>
+                          <strong>{mission.titulo}</strong>
+                          <span>{mission.ubicacion}</span>
+                        </div>
+                        <small>{mission.nivel_peligro}</small>
+                      </li>
+                    ))}
+                  </ol>
+                ) : (
+                  <p>Aún no tiene misiones completadas.</p>
+                )}
+              </section>
               {isAdmin ? (
                 <button
                   className="button button--secondary"

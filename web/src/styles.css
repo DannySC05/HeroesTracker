@@ -1461,6 +1461,72 @@ textarea:focus-visible {
   line-height: 1.5;
 }
 
+.hero-card__missions {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.85rem;
+  padding: 0.7rem;
+  border-left: 2px solid var(--accent);
+  background: rgba(230, 36, 41, 0.045);
+}
+
+.hero-card__missions > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.hero-card__missions > div span,
+.hero-card__missions > small {
+  color: var(--muted);
+  font-size: 0.52rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.hero-card__missions > div strong {
+  color: var(--accent-strong);
+  font-size: 0.72rem;
+}
+
+.hero-card__missions ul {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hero-card__missions li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+}
+
+.hero-card__missions li span {
+  overflow: hidden;
+  color: #c7d0d5;
+  font-size: 0.6rem;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hero-card__missions li small {
+  flex: 0 0 auto;
+  color: var(--gold);
+  font-size: 0.48rem;
+  font-weight: 900;
+}
+
+.hero-card__missions > p {
+  color: #667a84;
+  font-size: 0.58rem;
+}
+
 .hero-card__footer {
   display: grid;
   gap: 0.85rem;
@@ -1783,6 +1849,83 @@ textarea:focus-visible {
 
 .detail-list--columns {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.hero-mission-history {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1.1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+
+.hero-mission-history__heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.hero-mission-history__heading span {
+  color: var(--accent);
+  font-size: 0.48rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.hero-mission-history__heading h3 {
+  margin: 0.18rem 0 0;
+  color: var(--text);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+}
+
+.hero-mission-history__heading > strong {
+  color: var(--accent-strong);
+  font-size: 1.15rem;
+}
+
+.hero-mission-history ol {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hero-mission-history li {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.hero-mission-history time,
+.hero-mission-history li small {
+  color: var(--muted);
+  font-size: 0.52rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.hero-mission-history li > div {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.hero-mission-history li > div strong {
+  color: #d8dfe3;
+  font-size: 0.65rem;
+}
+
+.hero-mission-history li > div span,
+.hero-mission-history > p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.56rem;
 }
 
 .mission-detail > p {
