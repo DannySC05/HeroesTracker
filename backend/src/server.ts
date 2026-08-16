@@ -1,14 +1,14 @@
 import { createApp } from './app.js';
 import { authConfig } from './config/auth.js';
 import { corsOrigins, env } from './config/env.js';
-import { prisma } from './lib/prisma.js';
-import { PrismaAuthRepository } from './modules/auth/prisma-auth.repository.js';
-import { PrismaDomainRepository } from './modules/domain/prisma-domain.repository.js';
+import { database } from './lib/database.js';
+import { PostgresAuthRepository } from './modules/auth/postgres-auth.repository.js';
+import { PostgresDomainRepository } from './modules/domain/postgres-domain.repository.js';
 
 const app = createApp({
   authConfig,
-  authRepository: new PrismaAuthRepository(prisma),
-  domainRepository: new PrismaDomainRepository(prisma),
+  authRepository: new PostgresAuthRepository(database),
+  domainRepository: new PostgresDomainRepository(database),
   corsOrigins,
 });
 
@@ -20,7 +20,7 @@ async function shutdown(signal: string) {
   console.log(`Señal ${signal} recibida. Cerrando el servidor.`);
 
   server.close(async () => {
-    await prisma.$disconnect();
+    await database.end();
     process.exit(0);
   });
 }

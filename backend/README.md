@@ -1,15 +1,16 @@
 # Backend
 
-API REST de Heroes Tracker construida con Express, TypeScript, Prisma y JWT.
+API REST de Heroes Tracker construida con Express, TypeScript, PostgreSQL y JWT.
 
 ## Preparación
 
 1. Copiar `backend/.env.example` como `backend/.env`.
 2. Configurar `DATABASE_URL`, `JWT_SECRET` y las demás variables.
-3. Aplicar la migración y cargar los datos iniciales desde la raíz:
+3. Ejecutar `database/migrations/001_initial_schema.sql` una vez en el SQL Editor
+   de Supabase y cargar los datos iniciales desde la raíz:
 
 ```bash
-pnpm db:migrate:deploy
+pnpm db:check
 pnpm db:seed
 ```
 
@@ -66,6 +67,7 @@ Las pruebas HTTP verifican:
 - bloqueo `409` al eliminar héroes con misiones.
 
 Estas pruebas usan un repositorio en memoria para aislar la lógica HTTP. El
-repositorio de producción implementa el mismo contrato mediante Prisma. Con los
+repositorio de producción implementa el mismo contrato mediante consultas SQL
+parametrizadas con `pg`. Con los
 `.env` configurados, el mismo recorrido puede comprobarse contra Supabase como se
 describe en `docs/hito-4-verification.md`.

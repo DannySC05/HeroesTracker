@@ -7,13 +7,7 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    ignores: [
-      '**/dist/**',
-      '**/build/**',
-      '**/coverage/**',
-      '**/.expo/**',
-      'backend/src/generated/prisma/**',
-    ],
+    ignores: ['**/dist/**', '**/build/**', '**/coverage/**', '**/.expo/**'],
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommended,

@@ -6,4 +6,3 @@ coverage
 android
 ios
 pnpm-lock.yaml
-backend/src/generated/prisma

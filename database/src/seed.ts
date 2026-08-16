@@ -1,15 +1,7 @@
 import 'dotenv/config';
 
-import { PrismaPg } from '@prisma/adapter-pg';
 import { hash } from 'bcryptjs';
-
-import { PrismaClient } from '../../backend/src/generated/prisma/client.ts';
-import {
-  EstadoHeroe,
-  EstadoMision,
-  NivelPeligro,
-  RolUsuario,
-} from '../../backend/src/generated/prisma/enums.ts';
+import { Pool } from 'pg';
 
 function requiredEnvironment(name: string): string {
   const value = process.env[name]?.trim();
@@ -41,6 +33,10 @@ function seedEmail(name: string): string {
   return value;
 }
 
+function toDateOnly(value: Date): string {
+  return value.toISOString().slice(0, 10);
+}
+
 const rounds = Number(process.env.BCRYPT_ROUNDS ?? '12');
 
 if (!Number.isInteger(rounds) || rounds < 10 || rounds > 15) {
@@ -48,8 +44,7 @@ if (!Number.isInteger(rounds) || rounds < 10 || rounds > 15) {
 }
 
 const connectionString = requiredEnvironment('DATABASE_URL');
-const adapter = new PrismaPg({ connectionString });
-const prisma = new PrismaClient({ adapter });
+const database = new Pool({ connectionString });
 
 const usuarios = [
   {
@@ -57,14 +52,14 @@ const usuarios = [
     nombre: 'Administrador Marvel',
     email: seedEmail('SEED_ADMIN_EMAIL'),
     password: seedPassword('SEED_ADMIN_PASSWORD'),
-    rol: RolUsuario.ADMIN,
+    rol: 'ADMIN',
   },
   {
     id: '00000000-0000-4000-8000-000000000002',
     nombre: 'Usuario Consulta',
     email: seedEmail('SEED_CONSULTA_EMAIL'),
     password: seedPassword('SEED_CONSULTA_PASSWORD'),
-    rol: RolUsuario.CONSULTA,
+    rol: 'CONSULTA',
   },
 ] as const;
 
@@ -76,7 +71,7 @@ const heroes = [
     poderPrincipal: 'Sentido arácnido y agilidad sobrehumana',
     nivelPoder: 82,
     imagenUrl: 'https://placehold.co/600x400/991b1b/ffffff?text=Spider-Man',
-    estado: EstadoHeroe.ACTIVO,
+    estado: 'ACTIVO',
   },
   {
     id: '10000000-0000-4000-8000-000000000002',
@@ -85,7 +80,7 @@ const heroes = [
     poderPrincipal: 'Armadura tecnológica avanzada',
     nivelPoder: 88,
     imagenUrl: 'https://placehold.co/600x400/b91c1c/facc15?text=Iron+Man',
-    estado: EstadoHeroe.ACTIVO,
+    estado: 'ACTIVO',
   },
   {
     id: '10000000-0000-4000-8000-000000000003',
@@ -94,7 +89,7 @@ const heroes = [
     poderPrincipal: 'Control del trueno',
     nivelPoder: 96,
     imagenUrl: 'https://placehold.co/600x400/1d4ed8/ffffff?text=Thor',
-    estado: EstadoHeroe.ACTIVO,
+    estado: 'ACTIVO',
   },
   {
     id: '10000000-0000-4000-8000-000000000004',
@@ -103,7 +98,7 @@ const heroes = [
     poderPrincipal: 'Fuerza sobrehumana',
     nivelPoder: 98,
     imagenUrl: 'https://placehold.co/600x400/166534/ffffff?text=Hulk',
-    estado: EstadoHeroe.ACTIVO,
+    estado: 'ACTIVO',
   },
   {
     id: '10000000-0000-4000-8000-000000000005',
@@ -112,7 +107,7 @@ const heroes = [
     poderPrincipal: 'Artes místicas',
     nivelPoder: 92,
     imagenUrl: 'https://placehold.co/600x400/7e22ce/ffffff?text=Doctor+Strange',
-    estado: EstadoHeroe.ACTIVO,
+    estado: 'ACTIVO',
   },
   {
     id: '10000000-0000-4000-8000-000000000006',
@@ -121,7 +116,7 @@ const heroes = [
     poderPrincipal: 'Sentidos y fuerza mejorados',
     nivelPoder: 79,
     imagenUrl: 'https://placehold.co/600x400/18181b/a78bfa?text=Black+Panther',
-    estado: EstadoHeroe.ACTIVO,
+    estado: 'ACTIVO',
   },
   {
     id: '10000000-0000-4000-8000-000000000007',
@@ -130,7 +125,7 @@ const heroes = [
     poderPrincipal: 'Manipulación de energía cósmica',
     nivelPoder: 97,
     imagenUrl: 'https://placehold.co/600x400/1e3a8a/facc15?text=Captain+Marvel',
-    estado: EstadoHeroe.ACTIVO,
+    estado: 'ACTIVO',
   },
   {
     id: '10000000-0000-4000-8000-000000000008',
@@ -139,7 +134,7 @@ const heroes = [
     poderPrincipal: 'Manipulación de la realidad',
     nivelPoder: 99,
     imagenUrl: 'https://placehold.co/600x400/9f1239/ffffff?text=Scarlet+Witch',
-    estado: EstadoHeroe.INACTIVO,
+    estado: 'INACTIVO',
   },
 ] as const;
 
@@ -150,8 +145,8 @@ const misiones = [
     descripcion: 'Detener una amenaza tecnológica que afecta el centro de la ciudad.',
     ubicacion: 'Nueva York',
     fecha: new Date('2026-08-20T00:00:00.000Z'),
-    nivelPeligro: NivelPeligro.ALTO,
-    estado: EstadoMision.EN_PROGRESO,
+    nivelPeligro: 'ALTO',
+    estado: 'EN_PROGRESO',
     superheroeId: heroes[0].id,
   },
   {
@@ -160,8 +155,8 @@ const misiones = [
     descripcion: 'Recuperar tecnología robada antes de que sea replicada.',
     ubicacion: 'Malibú',
     fecha: new Date('2026-08-22T00:00:00.000Z'),
-    nivelPeligro: NivelPeligro.MEDIO,
-    estado: EstadoMision.PENDIENTE,
+    nivelPeligro: 'MEDIO',
+    estado: 'PENDIENTE',
     superheroeId: heroes[1].id,
   },
   {
@@ -170,8 +165,8 @@ const misiones = [
     descripcion: 'Restablecer el equilibrio tras una anomalía dimensional.',
     ubicacion: 'Asgard',
     fecha: new Date('2026-08-25T00:00:00.000Z'),
-    nivelPeligro: NivelPeligro.ALTO,
-    estado: EstadoMision.PENDIENTE,
+    nivelPeligro: 'ALTO',
+    estado: 'PENDIENTE',
     superheroeId: heroes[2].id,
   },
   {
@@ -180,8 +175,8 @@ const misiones = [
     descripcion: 'Asegurar material radiactivo en una instalación abandonada.',
     ubicacion: 'Desierto de Nevada',
     fecha: new Date('2026-08-28T00:00:00.000Z'),
-    nivelPeligro: NivelPeligro.ALTO,
-    estado: EstadoMision.COMPLETADA,
+    nivelPeligro: 'ALTO',
+    estado: 'COMPLETADA',
     superheroeId: heroes[3].id,
   },
   {
@@ -190,8 +185,8 @@ const misiones = [
     descripcion: 'Cerrar un portal que conecta con una dimensión desconocida.',
     ubicacion: 'Katmandú',
     fecha: new Date('2026-09-02T00:00:00.000Z'),
-    nivelPeligro: NivelPeligro.MEDIO,
-    estado: EstadoMision.EN_PROGRESO,
+    nivelPeligro: 'MEDIO',
+    estado: 'EN_PROGRESO',
     superheroeId: heroes[4].id,
   },
   {
@@ -200,8 +195,8 @@ const misiones = [
     descripcion: 'Localizar un cargamento de vibranium desaparecido.',
     ubicacion: 'Wakanda',
     fecha: new Date('2026-09-05T00:00:00.000Z'),
-    nivelPeligro: NivelPeligro.BAJO,
-    estado: EstadoMision.PENDIENTE,
+    nivelPeligro: 'BAJO',
+    estado: 'PENDIENTE',
     superheroeId: heroes[5].id,
   },
 ] as const;
@@ -214,55 +209,82 @@ async function main() {
     })),
   );
 
-  await prisma.$transaction(async (transaction) => {
+  const client = await database.connect();
+
+  try {
+    await client.query('BEGIN');
+
     for (const { usuario, passwordHash } of passwordHashes) {
-      await transaction.usuario.upsert({
-        where: { email: usuario.email },
-        create: {
-          id: usuario.id,
-          nombre: usuario.nombre,
-          email: usuario.email,
-          passwordHash,
-          rol: usuario.rol,
-        },
-        update: {
-          nombre: usuario.nombre,
-          passwordHash,
-          rol: usuario.rol,
-        },
-      });
+      await client.query(
+        `INSERT INTO usuarios (id, nombre, email, password_hash, rol, updated_at)
+         VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP)
+         ON CONFLICT (email) DO UPDATE SET
+           nombre = EXCLUDED.nombre,
+           password_hash = EXCLUDED.password_hash,
+           rol = EXCLUDED.rol,
+           updated_at = CURRENT_TIMESTAMP`,
+        [usuario.id, usuario.nombre, usuario.email, passwordHash, usuario.rol],
+      );
     }
 
     for (const heroe of heroes) {
-      await transaction.heroe.upsert({
-        where: { nombre: heroe.nombre },
-        create: heroe,
-        update: {
-          nombreReal: heroe.nombreReal,
-          poderPrincipal: heroe.poderPrincipal,
-          nivelPoder: heroe.nivelPoder,
-          imagenUrl: heroe.imagenUrl,
-          estado: heroe.estado,
-        },
-      });
+      await client.query(
+        `INSERT INTO heroes
+           (id, nombre, nombre_real, poder_principal, nivel_poder, imagen_url, estado, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP)
+         ON CONFLICT (nombre) DO UPDATE SET
+           nombre_real = EXCLUDED.nombre_real,
+           poder_principal = EXCLUDED.poder_principal,
+           nivel_poder = EXCLUDED.nivel_poder,
+           imagen_url = EXCLUDED.imagen_url,
+           estado = EXCLUDED.estado,
+           updated_at = CURRENT_TIMESTAMP`,
+        [
+          heroe.id,
+          heroe.nombre,
+          heroe.nombreReal,
+          heroe.poderPrincipal,
+          heroe.nivelPoder,
+          heroe.imagenUrl,
+          heroe.estado,
+        ],
+      );
     }
 
     for (const mision of misiones) {
-      await transaction.mision.upsert({
-        where: { id: mision.id },
-        create: mision,
-        update: {
-          titulo: mision.titulo,
-          descripcion: mision.descripcion,
-          ubicacion: mision.ubicacion,
-          fecha: mision.fecha,
-          nivelPeligro: mision.nivelPeligro,
-          estado: mision.estado,
-          superheroeId: mision.superheroeId,
-        },
-      });
+      await client.query(
+        `INSERT INTO misiones
+           (id, titulo, descripcion, ubicacion, fecha, nivel_peligro, estado, superheroe_id, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, CURRENT_TIMESTAMP)
+         ON CONFLICT (id) DO UPDATE SET
+           titulo = EXCLUDED.titulo,
+           descripcion = EXCLUDED.descripcion,
+           ubicacion = EXCLUDED.ubicacion,
+           fecha = EXCLUDED.fecha,
+           nivel_peligro = EXCLUDED.nivel_peligro,
+           estado = EXCLUDED.estado,
+           superheroe_id = EXCLUDED.superheroe_id,
+           updated_at = CURRENT_TIMESTAMP`,
+        [
+          mision.id,
+          mision.titulo,
+          mision.descripcion,
+          mision.ubicacion,
+          toDateOnly(mision.fecha),
+          mision.nivelPeligro,
+          mision.estado,
+          mision.superheroeId,
+        ],
+      );
     }
-  });
+
+    await client.query('COMMIT');
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
 
   console.log(
     `Seed completado: ${usuarios.length} usuarios, ${heroes.length} héroes y ${misiones.length} misiones.`,
@@ -275,5 +297,5 @@ main()
     process.exitCode = 1;
   })
   .finally(async () => {
-    await prisma.$disconnect();
+    await database.end();
   });

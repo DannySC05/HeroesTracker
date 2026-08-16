@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { z } from 'zod';
 
 const envSchema = z.object({
+  DATABASE_URL: z.string().url().startsWith('postgresql://'),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().default(3000),
   CORS_ORIGINS: z.string().default('http://localhost:5173'),

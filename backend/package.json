@@ -5,18 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "prebuild": "pnpm --filter @heroes-tracker/database generate",
     "build": "tsc -p tsconfig.build.json",
     "start": "node dist/server.js",
-    "pretypecheck": "pnpm --filter @heroes-tracker/database generate",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@prisma/adapter-pg": "^7.9.1",
-    "@prisma/client": "^7.9.1",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",

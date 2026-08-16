@@ -56,8 +56,7 @@ Los valores incluidos son ejemplos y no deben reutilizarse en producción.
 pnpm dev:backend  # API en http://localhost:3000
 pnpm dev:web      # Vite en http://localhost:5173
 pnpm dev:mobile   # servidor de Expo
-pnpm db:validate  # valida el esquema Prisma
-pnpm db:migrate:deploy # aplica migraciones versionadas
+pnpm db:check     # comprueba la conexión y las tablas en Supabase
 pnpm db:seed      # carga datos iniciales sin duplicarlos
 pnpm postman:validate # valida colección y ausencia de secretos
 pnpm postman:test # ejecuta el flujo Postman contra la API local

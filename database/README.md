@@ -1,7 +1,8 @@
 # Base de datos
 
-Este paquete contiene el esquema Prisma, la migración SQL inicial y el seed
-idempotente de Heroes Tracker para PostgreSQL en Supabase.
+Este paquete contiene la migración SQL inicial, la comprobación de conexión y el
+seed idempotente de Heroes Tracker para PostgreSQL en Supabase. No requiere ORM
+ni generación de clientes.
 
 ## Configuración
 
@@ -9,26 +10,23 @@ Copiar `.env.example` como `.env` dentro de esta carpeta y sustituir los valores
 
 ```text
 DATABASE_URL  URL del pooler de sesión para el seed y la aplicación
-DIRECT_URL    conexión directa usada por Prisma Migrate
 ```
 
-En entornos sin IPv6, `DIRECT_URL` puede usar el pooler de sesión de Supabase en
-el puerto 5432. Las contraseñas con caracteres especiales deben codificarse para
-URL.
+La conexión recomendada para desarrollo local es el pooler de sesión de Supabase
+en el puerto 5432. Las contraseñas con caracteres especiales deben codificarse
+para URL.
 
 ## Comandos desde la raíz
 
 ```bash
-pnpm db:validate
-pnpm db:generate
-pnpm db:migrate:deploy
+pnpm db:check
 pnpm db:seed
-pnpm db:studio
 ```
 
-`db:migrate:deploy` aplica migraciones ya versionadas y es el comando previsto
-para Supabase. `db:migrate:dev` se reserva para una base PostgreSQL local o una
-rama de desarrollo; nunca debe ejecutarse directamente contra producción.
+La primera vez, copiar el contenido de
+`database/migrations/001_initial_schema.sql` en el SQL Editor de Supabase y
+ejecutarlo. Después, `db:check` confirma que la conexión funciona y que existen
+las cuatro tablas esperadas.
 
 El seed puede repetirse sin crear duplicados. Actualiza los dos usuarios de prueba,
 los ocho héroes y las seis misiones identificados por claves estables.
