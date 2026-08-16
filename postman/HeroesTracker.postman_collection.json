@@ -1,0 +1,803 @@
+{
+  "info": {
+    "_postman_id": "7f42a75b-b97c-4b13-8cd4-b4d79eaef460",
+    "name": "HeroesTracker API",
+    "description": "Colección del Hito 5. Ejecutar la carpeta “Flujo automatizado” para probar autenticación, permisos, CRUD, errores y limpieza.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Flujo automatizado",
+      "description": "Ejecutar esta carpeta con el Collection Runner. Requiere las credenciales de los usuarios ADMIN y CONSULTA sembrados.",
+      "item": [
+        {
+          "name": "01 - Preparación y autenticación",
+          "item": [
+            {
+              "name": "Health",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Servicio saludable\", () => pm.expect(response.data.status).to.eql(\"ok\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": { "method": "GET", "header": [], "url": "{{base_url}}/api/health" }
+            },
+            {
+              "name": "Login ADMIN",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Rol ADMIN\", () => pm.expect(response.data.usuario.rol).to.eql(\"ADMIN\"));",
+                      "pm.test(\"JWT recibido\", () => pm.expect(response.data.token).to.be.a(\"string\").and.not.empty);",
+                      "pm.environment.set(\"admin_token\", response.data.token);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json", "type": "text" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{admin_email}}\",\n  \"password\": \"{{admin_password}}\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": "{{base_url}}/api/auth/login"
+              }
+            },
+            {
+              "name": "Login CONSULTA",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Rol CONSULTA\", () => pm.expect(response.data.usuario.rol).to.eql(\"CONSULTA\"));",
+                      "pm.environment.set(\"consulta_token\", response.data.token);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json", "type": "text" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{consulta_email}}\",\n  \"password\": \"{{consulta_password}}\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": "{{base_url}}/api/auth/login"
+              }
+            },
+            {
+              "name": "Me ADMIN",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Usuario autenticado\", () => pm.expect(response.data.rol).to.eql(\"ADMIN\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{admin_token}}", "type": "text" }
+                ],
+                "url": "{{base_url}}/api/auth/me"
+              }
+            }
+          ]
+        },
+        {
+          "name": "02 - Héroes",
+          "item": [
+            {
+              "name": "Listar héroes como CONSULTA",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Listado con total\", () => { pm.expect(response.data).to.be.an(\"array\"); pm.expect(response.meta.total).to.eql(response.data.length); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{consulta_token}}", "type": "text" }
+                ],
+                "url": "{{base_url}}/api/heroes"
+              }
+            },
+            {
+              "name": "Crear héroe como ADMIN",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const suffix = `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;",
+                      "pm.collectionVariables.set(\"run_suffix\", suffix);",
+                      "pm.collectionVariables.unset(\"hero_id\");",
+                      "pm.collectionVariables.unset(\"mission_id\");"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Héroe creado\", () => pm.expect(response.data.id).to.be.a(\"string\").and.not.empty);",
+                      "pm.collectionVariables.set(\"hero_id\", response.data.id);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{admin_token}}", "type": "text" },
+                  { "key": "Content-Type", "value": "application/json", "type": "text" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Postman Hero {{run_suffix}}\",\n  \"nombre_real\": \"Identidad Temporal\",\n  \"poder_principal\": \"Pruebas automatizadas\",\n  \"nivel_poder\": 50,\n  \"imagen_url\": \"https://example.com/postman-hero.jpg\",\n  \"estado\": \"ACTIVO\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": "{{base_url}}/api/heroes"
+              }
+            },
+            {
+              "name": "Obtener héroe creado",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                      "const response = pm.response.json();",
+                      "pm.test(\"UUID coincide\", () => pm.expect(response.data.id).to.eql(pm.collectionVariables.get(\"hero_id\")));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{admin_token}}", "type": "text" }
+                ],
+                "url": "{{base_url}}/api/heroes/{{hero_id}}"
+              }
+            },
+            {
+              "name": "Buscar héroe por nombre",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Búsqueda encuentra el temporal\", () => pm.expect(response.data.some((hero) => hero.id === pm.collectionVariables.get(\"hero_id\"))).to.be.true);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{consulta_token}}", "type": "text" }
+                ],
+                "url": "{{base_url}}/api/heroes?nombre={{run_suffix}}"
+              }
+            },
+            {
+              "name": "Actualizar héroe como ADMIN",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Actualización persistida\", () => { pm.expect(response.data.nivel_poder).to.eql(51); pm.expect(response.data.estado).to.eql(\"INACTIVO\"); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{admin_token}}", "type": "text" },
+                  { "key": "Content-Type", "value": "application/json", "type": "text" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Postman Hero Updated {{run_suffix}}\",\n  \"nombre_real\": \"Identidad Temporal\",\n  \"poder_principal\": \"Pruebas automatizadas\",\n  \"nivel_poder\": 51,\n  \"imagen_url\": \"https://example.com/postman-hero.jpg\",\n  \"estado\": \"INACTIVO\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": "{{base_url}}/api/heroes/{{hero_id}}"
+              }
+            },
+            {
+              "name": "Nombre duplicado",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 409\", () => pm.response.to.have.status(409));",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Código de error HERO_NAME_ALREADY_EXISTS\", () => pm.expect(response.error.code).to.eql(\"HERO_NAME_ALREADY_EXISTS\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{admin_token}}", "type": "text" },
+                  { "key": "Content-Type", "value": "application/json", "type": "text" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"postman hero updated {{run_suffix}}\",\n  \"nombre_real\": \"Identidad Temporal\",\n  \"poder_principal\": \"Pruebas automatizadas\",\n  \"nivel_poder\": 51,\n  \"imagen_url\": \"https://example.com/postman-hero.jpg\",\n  \"estado\": \"INACTIVO\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": "{{base_url}}/api/heroes"
+              }
+            },
+            {
+              "name": "CONSULTA no puede crear héroes",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 403\", () => pm.response.to.have.status(403));",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Código de error FORBIDDEN\", () => pm.expect(response.error.code).to.eql(\"FORBIDDEN\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{consulta_token}}", "type": "text" },
+                  { "key": "Content-Type", "value": "application/json", "type": "text" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Forbidden {{run_suffix}}\",\n  \"nombre_real\": \"Identidad Temporal\",\n  \"poder_principal\": \"Pruebas automatizadas\",\n  \"nivel_poder\": 50,\n  \"imagen_url\": \"https://example.com/postman-hero.jpg\",\n  \"estado\": \"ACTIVO\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": "{{base_url}}/api/heroes"
+              }
+            }
+          ]
+        },
+        {
+          "name": "03 - Misiones",
+          "item": [
+            {
+              "name": "Listar misiones como CONSULTA",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Listado con total\", () => { pm.expect(response.data).to.be.an(\"array\"); pm.expect(response.meta.total).to.eql(response.data.length); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{consulta_token}}", "type": "text" }
+                ],
+                "url": "{{base_url}}/api/misiones"
+              }
+            },
+            {
+              "name": "Crear misión como ADMIN",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Relación correcta\", () => pm.expect(response.data.superheroe_id).to.eql(pm.collectionVariables.get(\"hero_id\")));",
+                      "pm.collectionVariables.set(\"mission_id\", response.data.id);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{admin_token}}", "type": "text" },
+                  { "key": "Content-Type", "value": "application/json", "type": "text" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"titulo\": \"Postman Mission {{run_suffix}}\",\n  \"descripcion\": \"Misión temporal para verificar la API.\",\n  \"ubicacion\": \"Entorno de pruebas\",\n  \"fecha\": \"2026-10-20\",\n  \"nivel_peligro\": \"MEDIO\",\n  \"estado\": \"PENDIENTE\",\n  \"superheroe_id\": \"{{hero_id}}\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": "{{base_url}}/api/misiones"
+              }
+            },
+            {
+              "name": "Obtener misión creada",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                      "const response = pm.response.json();",
+                      "pm.test(\"UUID coincide\", () => pm.expect(response.data.id).to.eql(pm.collectionVariables.get(\"mission_id\")));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{admin_token}}", "type": "text" }
+                ],
+                "url": "{{base_url}}/api/misiones/{{mission_id}}"
+              }
+            },
+            {
+              "name": "Actualizar misión como ADMIN",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Actualización persistida\", () => { pm.expect(response.data.fecha).to.eql(\"2026-10-21\"); pm.expect(response.data.estado).to.eql(\"COMPLETADA\"); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{admin_token}}", "type": "text" },
+                  { "key": "Content-Type", "value": "application/json", "type": "text" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"titulo\": \"Postman Mission Updated {{run_suffix}}\",\n  \"descripcion\": \"Misión temporal para verificar la API.\",\n  \"ubicacion\": \"Entorno de pruebas\",\n  \"fecha\": \"2026-10-21\",\n  \"nivel_peligro\": \"ALTO\",\n  \"estado\": \"COMPLETADA\",\n  \"superheroe_id\": \"{{hero_id}}\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": "{{base_url}}/api/misiones/{{mission_id}}"
+              }
+            },
+            {
+              "name": "CONSULTA no puede crear misiones",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 403\", () => pm.response.to.have.status(403));",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Código de error FORBIDDEN\", () => pm.expect(response.error.code).to.eql(\"FORBIDDEN\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{consulta_token}}", "type": "text" },
+                  { "key": "Content-Type", "value": "application/json", "type": "text" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"titulo\": \"Postman Mission {{run_suffix}}\",\n  \"descripcion\": \"Misión temporal para verificar la API.\",\n  \"ubicacion\": \"Entorno de pruebas\",\n  \"fecha\": \"2026-10-20\",\n  \"nivel_peligro\": \"MEDIO\",\n  \"estado\": \"PENDIENTE\",\n  \"superheroe_id\": \"{{hero_id}}\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": "{{base_url}}/api/misiones"
+              }
+            },
+            {
+              "name": "Misión con fecha inválida",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Código de error VALIDATION_ERROR\", () => pm.expect(response.error.code).to.eql(\"VALIDATION_ERROR\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{admin_token}}", "type": "text" },
+                  { "key": "Content-Type", "value": "application/json", "type": "text" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"titulo\": \"Postman Mission {{run_suffix}}\",\n  \"descripcion\": \"Misión temporal para verificar la API.\",\n  \"ubicacion\": \"Entorno de pruebas\",\n  \"fecha\": \"2026-02-30\",\n  \"nivel_peligro\": \"MEDIO\",\n  \"estado\": \"PENDIENTE\",\n  \"superheroe_id\": \"{{hero_id}}\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": "{{base_url}}/api/misiones"
+              }
+            }
+          ]
+        },
+        {
+          "name": "04 - Errores y reglas de negocio",
+          "item": [
+            {
+              "name": "Héroe con misiones no se elimina",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 409\", () => pm.response.to.have.status(409));",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Código de error HERO_HAS_MISSIONS\", () => pm.expect(response.error.code).to.eql(\"HERO_HAS_MISSIONS\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{admin_token}}", "type": "text" }
+                ],
+                "url": "{{base_url}}/api/heroes/{{hero_id}}"
+              }
+            },
+            {
+              "name": "Ruta protegida sin token",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 401\", () => pm.response.to.have.status(401));",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Código de error AUTHENTICATION_REQUIRED\", () => pm.expect(response.error.code).to.eql(\"AUTHENTICATION_REQUIRED\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": { "method": "GET", "header": [], "url": "{{base_url}}/api/heroes" }
+            },
+            {
+              "name": "UUID inválido",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Código de error VALIDATION_ERROR\", () => pm.expect(response.error.code).to.eql(\"VALIDATION_ERROR\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{admin_token}}", "type": "text" }
+                ],
+                "url": "{{base_url}}/api/heroes/no-es-uuid"
+              }
+            },
+            {
+              "name": "Héroe inexistente",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 404\", () => pm.response.to.have.status(404));",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Código de error RESOURCE_NOT_FOUND\", () => pm.expect(response.error.code).to.eql(\"RESOURCE_NOT_FOUND\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{admin_token}}", "type": "text" }
+                ],
+                "url": "{{base_url}}/api/heroes/00000000-0000-4000-8000-000000000000"
+              }
+            },
+            {
+              "name": "Misión inexistente",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 404\", () => pm.response.to.have.status(404));",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Código de error RESOURCE_NOT_FOUND\", () => pm.expect(response.error.code).to.eql(\"RESOURCE_NOT_FOUND\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{admin_token}}", "type": "text" }
+                ],
+                "url": "{{base_url}}/api/misiones/00000000-0000-4000-8000-000000000000"
+              }
+            }
+          ]
+        },
+        {
+          "name": "05 - Limpieza y cierre",
+          "item": [
+            {
+              "name": "Eliminar misión temporal",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 204\", () => pm.response.to.have.status(204));",
+                      "pm.collectionVariables.unset(\"mission_id\");"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{admin_token}}", "type": "text" }
+                ],
+                "url": "{{base_url}}/api/misiones/{{mission_id}}"
+              }
+            },
+            {
+              "name": "Eliminar héroe temporal",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": ["pm.test(\"Responde 204\", () => pm.response.to.have.status(204));"]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{admin_token}}", "type": "text" }
+                ],
+                "url": "{{base_url}}/api/heroes/{{hero_id}}"
+              }
+            },
+            {
+              "name": "Confirmar héroe eliminado",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 404\", () => pm.response.to.have.status(404));",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Código de error RESOURCE_NOT_FOUND\", () => pm.expect(response.error.code).to.eql(\"RESOURCE_NOT_FOUND\"));",
+                      "pm.collectionVariables.unset(\"hero_id\");",
+                      "pm.collectionVariables.unset(\"run_suffix\");"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{admin_token}}", "type": "text" }
+                ],
+                "url": "{{base_url}}/api/heroes/{{hero_id}}"
+              }
+            },
+            {
+              "name": "Logout CONSULTA",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": ["pm.test(\"Responde 204\", () => pm.response.to.have.status(204));"]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{consulta_token}}", "type": "text" }
+                ],
+                "url": "{{base_url}}/api/auth/logout"
+              }
+            },
+            {
+              "name": "Token CONSULTA revocado",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 401\", () => pm.response.to.have.status(401));",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Código de error AUTHENTICATION_REQUIRED\", () => pm.expect(response.error.code).to.eql(\"AUTHENTICATION_REQUIRED\"));",
+                      "pm.environment.unset(\"consulta_token\");"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{consulta_token}}", "type": "text" }
+                ],
+                "url": "{{base_url}}/api/auth/me"
+              }
+            },
+            {
+              "name": "Logout ADMIN",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Responde 204\", () => pm.response.to.have.status(204));",
+                      "pm.environment.unset(\"admin_token\");"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{admin_token}}", "type": "text" }
+                ],
+                "url": "{{base_url}}/api/auth/logout"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Ejemplos manuales",
+      "description": "No se ejecutan en el comando automatizado. El registro requiere un email que aún no exista.",
+      "item": [
+        {
+          "name": "Registrar usuario CONSULTA",
+          "description": "Ejecutar manualmente con un email nuevo. La API no incluye eliminación de usuarios, por lo que no forma parte del flujo automatizado.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "const response = pm.response.json();",
+                  "pm.test(\"Siempre registra CONSULTA\", () => pm.expect(response.data.rol).to.eql(\"CONSULTA\"));",
+                  "pm.test(\"No expone contraseña\", () => pm.expect(JSON.stringify(response)).not.to.include(\"password\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json", "type": "text" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"{{manual_register_name}}\",\n  \"email\": \"{{manual_register_email}}\",\n  \"password\": \"{{manual_register_password}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{base_url}}/api/auth/register",
+            "description": "Ejecutar manualmente con un email nuevo. La API no incluye eliminación de usuarios, por lo que no forma parte del flujo automatizado."
+          }
+        },
+        {
+          "name": "Login con credenciales inválidas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 401\", () => pm.response.to.have.status(401));",
+                  "const response = pm.response.json();",
+                  "pm.test(\"Código de error INVALID_CREDENTIALS\", () => pm.expect(response.error.code).to.eql(\"INVALID_CREDENTIALS\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json", "type": "text" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"invalid@example.com\",\n  \"password\": \"InvalidPassword123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{base_url}}/api/auth/login"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "run_suffix", "value": "" },
+    { "key": "hero_id", "value": "" },
+    { "key": "mission_id", "value": "" }
+  ]
+}

@@ -19,6 +19,10 @@
     "db:migrate:deploy": "pnpm --filter @heroes-tracker/database migrate:deploy",
     "db:seed": "pnpm --filter @heroes-tracker/database seed",
     "db:studio": "pnpm --filter @heroes-tracker/database studio",
+    "postman:generate": "node postman/build-collection.mjs",
+    "postman:validate": "node postman/validate.mjs",
+    "prepostman:test": "pnpm --filter @heroes-tracker/backend build",
+    "postman:test": "node postman/run-local.mjs",
     "build": "pnpm --recursive --if-present run build",
     "test": "pnpm --recursive --if-present run test",
     "typecheck": "pnpm --recursive --if-present run typecheck",
@@ -33,6 +37,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.4",
     "globals": "^17.11.0",
+    "newman": "^6.2.2",
     "prettier": "^3.9.6",
     "typescript-eslint": "^8.67.0"
   }

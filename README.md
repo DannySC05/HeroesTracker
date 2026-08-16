@@ -10,6 +10,7 @@ una API REST, una aplicación web y una aplicación móvil.
 - Hito 2: esquema, migración y datos iniciales de PostgreSQL completados.
 - Hito 3: autenticación JWT y autorización por roles completadas.
 - Hito 4: CRUD protegido de héroes y misiones completado y verificado con Supabase.
+- Hito 5: colección Postman automatizada completada y verificada con Supabase.
 - Interfaces web/móvil: pendientes de sus hitos correspondientes.
 
 ## Estructura
@@ -57,6 +58,8 @@ pnpm dev:mobile   # servidor de Expo
 pnpm db:validate  # valida el esquema Prisma
 pnpm db:migrate:deploy # aplica migraciones versionadas
 pnpm db:seed      # carga datos iniciales sin duplicarlos
+pnpm postman:validate # valida colección y ausencia de secretos
+pnpm postman:test # ejecuta el flujo Postman contra la API local
 pnpm test         # ejecuta las pruebas automatizadas
 pnpm lint
 pnpm typecheck
@@ -74,4 +77,5 @@ roles, validaciones, conflictos y relaciones definidas en
 [el contrato de la API](./docs/api-contract.md).
 
 La evidencia y el procedimiento de comprobación del backend están en
-[la verificación del Hito 4](./docs/hito-4-verification.md).
+[la verificación del Hito 4](./docs/hito-4-verification.md). La colección y sus
+instrucciones se encuentran en [postman/](./postman/README.md).

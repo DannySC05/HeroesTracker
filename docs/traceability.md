@@ -22,7 +22,7 @@ implementarlos dentro de la arquitectura acordada.
 | Mobile con login e inicio                          | Expo + React Navigation                              |                      8 |
 | JWT y favoritos persistentes                       | AsyncStorage                                         |                      8 |
 | Listados móviles con `FlatList`                    | Pantallas de héroes y misiones desde la API          |                      8 |
-| Postman para autenticación y CRUD                  | Colección con scripts y environments                 |                      5 |
+| Postman para autenticación y CRUD                  | Colección ejecutable, scripts y environments         |           5 (completo) |
 | Código integrado y sin datos principales estáticos | Web/mobile consumen únicamente la API                |                    6-9 |
 | Código organizado y sin duplicación innecesaria    | Capas por responsabilidad y utilidades locales       |                    1-9 |
 | README de instalación y ejecución                  | README raíz, variables y comandos                    |                     10 |
