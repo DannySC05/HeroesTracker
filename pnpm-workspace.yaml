@@ -1,0 +1,10 @@
+packages:
+  - backend
+  - database
+  - web
+  - mobile
+
+allowBuilds:
+  '@prisma/engines': true
+  esbuild: true
+  prisma: true

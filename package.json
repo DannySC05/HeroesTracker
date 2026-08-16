@@ -1,0 +1,39 @@
+{
+  "name": "heroes-tracker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Monorepo para la plataforma de gestión de superhéroes y misiones.",
+  "packageManager": "pnpm@11.19.0",
+  "engines": {
+    "node": ">=22.13.0",
+    "pnpm": ">=10.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm --recursive --parallel --stream run dev",
+    "dev:backend": "pnpm --filter @heroes-tracker/backend dev",
+    "dev:web": "pnpm --filter @heroes-tracker/web dev",
+    "dev:mobile": "pnpm --filter @heroes-tracker/mobile dev",
+    "db:generate": "pnpm --filter @heroes-tracker/database generate",
+    "db:validate": "pnpm --filter @heroes-tracker/database validate",
+    "db:migrate:dev": "pnpm --filter @heroes-tracker/database migrate:dev",
+    "db:migrate:deploy": "pnpm --filter @heroes-tracker/database migrate:deploy",
+    "db:seed": "pnpm --filter @heroes-tracker/database seed",
+    "db:studio": "pnpm --filter @heroes-tracker/database studio",
+    "build": "pnpm --recursive --if-present run build",
+    "test": "pnpm --recursive --if-present run test",
+    "typecheck": "pnpm --recursive --if-present run typecheck",
+    "lint": "pnpm --recursive --if-present run lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.8.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.4",
+    "globals": "^17.11.0",
+    "prettier": "^3.9.6",
+    "typescript-eslint": "^8.67.0"
+  }
+}
